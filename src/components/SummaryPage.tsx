@@ -628,8 +628,7 @@ export function SummaryPage({ readings }: SummaryPageProps) {
         </div>
         <div style={styles.exportSection}>
           <p style={styles.exportDescription}>
-            Export your blood pressure readings as a CSV file for sharing with
-            your healthcare provider.
+            Export your readings as CSV for your healthcare provider.
           </p>
 
           <div style={styles.dateFilters}>
@@ -692,18 +691,6 @@ export function SummaryPage({ readings }: SummaryPageProps) {
               )}
             </span>
           </button>
-
-          <div style={styles.exportInfo}>
-            <p style={styles.exportInfoText}>
-              <span
-                style={{ display: "flex", alignItems: "center", gap: "8px" }}
-              >
-                <Lightbulb size={16} />
-                The CSV file will include: Date, Time, Systolic, Diastolic,
-                Pulse, Body Position, and Notes
-              </span>
-            </p>
-          </div>
         </div>
       </div>
     </div>
@@ -833,37 +820,37 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: "#737373",
   },
   exportSection: {
-    padding: "20px",
+    padding: "16px",
     display: "flex",
     flexDirection: "column",
-    gap: "20px",
+    gap: "16px",
   },
   exportDescription: {
-    fontSize: "14px",
+    fontSize: "13px",
     color: "#737373",
     margin: 0,
-    lineHeight: "1.6",
+    lineHeight: "1.5",
   },
   dateFilters: {
     display: "flex",
     flexDirection: "column",
-    gap: "12px",
+    gap: "10px",
   },
   dateGroup: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
+    gap: "6px",
   },
   dateLabel: {
-    fontSize: "13px",
+    fontSize: "12px",
     fontWeight: "500",
     color: "#525252",
   },
   dateInput: {
-    padding: "14px 16px",
-    fontSize: "16px",
+    padding: "12px 14px",
+    fontSize: "14px",
     border: "1px solid #e5e5e5",
-    borderRadius: "12px",
+    borderRadius: "10px",
     outline: "none",
     backgroundColor: "#fafafa",
   },
@@ -874,13 +861,13 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: "none",
   },
   exportButton: {
-    padding: "16px 24px",
-    fontSize: "16px",
+    padding: "14px 20px",
+    fontSize: "15px",
     fontWeight: "600",
     color: "#ffffff",
     background: "linear-gradient(135deg, #6B7CF5 0%, #5B6CF4 100%)",
     border: "none",
-    borderRadius: "12px",
+    borderRadius: "10px",
     cursor: "pointer",
     transition: "all 0.2s",
     width: "100%",
