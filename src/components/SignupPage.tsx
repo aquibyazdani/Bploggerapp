@@ -45,7 +45,7 @@ export const SignupPage: React.FC = () => {
         <div style={styles.header}>
           <Activity size={32} style={styles.icon} />
           <h1 style={styles.title}>Create Account</h1>
-          <p style={styles.subtitle}>Join BP Logger to track your health</p>
+          <p style={styles.subtitle}>Join BP Tracker to track your health</p>
         </div>
 
         <form onSubmit={handleSubmit} style={styles.form}>

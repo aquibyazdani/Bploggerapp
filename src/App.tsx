@@ -1,5 +1,5 @@
 /**
- * BP Logger - Professional Blood Pressure Tracking Application
+ * BP Tracker - Professional Blood Pressure Tracking Application
  *
  * Multi-page app with:
  * - Dashboard: Overview of readings
@@ -236,7 +236,7 @@ function AppContent() {
       <header style={styles.header}>
         <div style={styles.headerContent}>
           <Activity size={24} style={styles.headerIcon} />
-          <h1 style={styles.headerTitle}>BP Logger</h1>
+          <h1 style={styles.headerTitle}>BP Tracker</h1>
           <button onClick={handleLogout} style={styles.logoutButton}>
             <LogOut size={20} />
           </button>

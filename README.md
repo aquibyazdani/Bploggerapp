@@ -1,4 +1,4 @@
-# BP Logger - Blood Pressure Tracking App
+# BP Tracker - Blood Pressure Tracking App
 
 A modern, full-stack web application for tracking blood pressure readings with user authentication and data visualization.
 
