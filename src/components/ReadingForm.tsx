@@ -96,7 +96,7 @@ export function ReadingForm({
     const timestamp = new Date(`${date}T${time}`).toISOString();
 
     const reading: Reading = {
-      id: editingReading?.id || generateId(),
+      _id: editingReading?._id || generateId(),
       systolic: Number(systolic),
       diastolic: Number(diastolic),
       pulse: pulse ? Number(pulse) : undefined,
