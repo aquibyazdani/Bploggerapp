@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bplogger.aquibyazdani.com/sitemap.xml
