@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Reading } from '../App';
-import { ReadingsList } from './ReadingsList';
-import { ReadingForm } from './ReadingForm';
-import { Plus } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { Reading } from "../App";
+import { ReadingsList } from "./ReadingsList";
+import { ReadingForm } from "./ReadingForm";
+import { Plus } from "lucide-react";
 
 interface ReadingsPageProps {
   readings: Reading[];
-  onAdd: (reading: Omit<Reading, 'id'>) => void;
+  onAdd: (reading: Omit<Reading, "_id" | "timestamp">) => void;
   onEdit: (reading: Reading) => void;
   onUpdate: (reading: Reading) => void;
   onDelete: (id: string) => void;
@@ -15,12 +15,12 @@ interface ReadingsPageProps {
   showFormInitial?: boolean;
 }
 
-export function ReadingsPage({ 
-  readings, 
-  onAdd, 
-  onEdit, 
-  onUpdate, 
-  onDelete, 
+export function ReadingsPage({
+  readings,
+  onAdd,
+  onEdit,
+  onUpdate,
+  onDelete,
   onCancelEdit,
   editingReading,
   showFormInitial = false,
@@ -38,14 +38,14 @@ export function ReadingsPage({
     }
     setShowForm(!showForm);
     if (!showForm) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
   const handleEdit = (reading: Reading) => {
     setShowForm(true);
     onEdit(reading);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleSubmit = (reading: Reading) => {
@@ -72,11 +72,11 @@ export function ReadingsPage({
         />
       )}
 
-      <ReadingsList 
+      <ReadingsList
         readings={readings}
         onEdit={handleEdit}
         onDelete={onDelete}
-        editingId={editingReading?.id}
+        editingId={editingReading?._id}
       />
 
       {/* Floating Action Button */}
@@ -84,11 +84,11 @@ export function ReadingsPage({
         onClick={handleAddClick}
         style={{
           ...styles.fab,
-          transform: showForm 
-            ? 'translateX(calc(215px - 32px)) rotate(45deg)' 
-            : 'translateX(calc(215px - 32px))',
+          transform: showForm
+            ? "translateX(calc(215px - 32px)) rotate(45deg)"
+            : "translateX(calc(215px - 32px))",
         }}
-        aria-label={showForm ? 'Close form' : 'Add new reading'}
+        aria-label={showForm ? "Close form" : "Add new reading"}
       >
         <Plus size={28} strokeWidth={2.5} />
       </button>
@@ -98,25 +98,25 @@ export function ReadingsPage({
 
 const styles: { [key: string]: React.CSSProperties } = {
   container: {
-    paddingBottom: '20px',
+    paddingBottom: "20px",
   },
   fab: {
-    position: 'fixed',
-    bottom: '90px',
-    right: '50%',
-    transform: 'translateX(calc(215px - 32px))',
-    width: '56px',
-    height: '56px',
-    borderRadius: '50%',
-    background: 'linear-gradient(135deg, #6B7CF5 0%, #5B6CF4 100%)',
-    color: '#ffffff',
-    border: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    boxShadow: '0 6px 20px rgba(107, 124, 245, 0.4)',
+    position: "fixed",
+    bottom: "90px",
+    right: "50%",
+    transform: "translateX(calc(215px - 32px))",
+    width: "56px",
+    height: "56px",
+    borderRadius: "50%",
+    background: "linear-gradient(135deg, #6B7CF5 0%, #5B6CF4 100%)",
+    color: "#ffffff",
+    border: "none",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    boxShadow: "0 6px 20px rgba(107, 124, 245, 0.4)",
     zIndex: 45,
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
   },
 };

@@ -14,9 +14,14 @@ import {
 interface DashboardPageProps {
   readings: Reading[];
   onAddClick: () => void;
+  userName?: string;
 }
 
-export function DashboardPage({ readings, onAddClick }: DashboardPageProps) {
+export function DashboardPage({
+  readings,
+  onAddClick,
+  userName,
+}: DashboardPageProps) {
   // Calculate statistics
   const stats = React.useMemo(() => {
     if (readings.length === 0) {
@@ -68,7 +73,7 @@ export function DashboardPage({ readings, onAddClick }: DashboardPageProps) {
     <div style={styles.container}>
       {/* Header */}
       <div style={styles.header}>
-        <h1 style={styles.greeting}>Hello, Aquib</h1>
+        <h1 style={styles.greeting}>Hello, {userName || "User"}</h1>
         <p style={styles.subGreeting}>Here's your blood pressure overview</p>
       </div>
 
@@ -253,6 +258,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     WebkitTextFillColor: "transparent",
     backgroundClip: "text",
     letterSpacing: "-0.02em",
+    textTransform: "capitalize",
   },
   subGreeting: {
     margin: "4px 0 0 0",
