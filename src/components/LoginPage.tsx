@@ -31,7 +31,9 @@ export const LoginPage: React.FC = () => {
         <div style={styles.header}>
           <Activity size={32} style={styles.icon} />
           <h1 style={styles.title}>Welcome Back</h1>
-          <p style={styles.subtitle}>Sign in to your BP Logger account</p>
+          <p style={styles.subtitle}>
+            Log in to securely access your blood pressure records.
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} style={styles.form}>
