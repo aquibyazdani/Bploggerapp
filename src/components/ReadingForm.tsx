@@ -135,117 +135,124 @@ export function ReadingForm({
       </div>
       <form onSubmit={handleSubmit} style={styles.form}>
         <div style={styles.grid}>
-          {/* Date */}
-          <div style={styles.formGroup}>
-            <label htmlFor="date" style={styles.label}>
-              Date <span style={styles.required}>*</span>
-            </label>
-            <input
-              id="date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              style={styles.input}
-              aria-required="true"
-            />
+          {/* Date & Time Row */}
+          <div style={styles.row}>
+            <div style={styles.formGroup}>
+              <label htmlFor="date" style={styles.label}>
+                Date <span style={styles.required}>*</span>
+              </label>
+              <input
+                id="date"
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                style={styles.input}
+                aria-required="true"
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label htmlFor="time" style={styles.label}>
+                Time <span style={styles.required}>*</span>
+              </label>
+              <input
+                id="time"
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                style={styles.input}
+                aria-required="true"
+              />
+            </div>
           </div>
 
-          {/* Time */}
-          <div style={styles.formGroup}>
-            <label htmlFor="time" style={styles.label}>
-              Time <span style={styles.required}>*</span>
-            </label>
-            <input
-              id="time"
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              style={styles.input}
-              aria-required="true"
-            />
+          {/* BP Row */}
+          <div style={styles.row}>
+            <div style={styles.formGroup}>
+              <label htmlFor="systolic" style={styles.label}>
+                Systolic <span style={styles.required}>*</span>
+              </label>
+              <input
+                id="systolic"
+                type="number"
+                value={systolic}
+                onChange={(e) => setSystolic(e.target.value)}
+                style={{
+                  ...styles.input,
+                  ...(errors.systolic ? styles.inputError : {}),
+                }}
+                placeholder="120"
+                aria-required="true"
+                aria-invalid={!!errors.systolic}
+              />
+              {errors.systolic && (
+                <div style={styles.errorContainer}>
+                  <span style={styles.errorText}>{errors.systolic}</span>
+                </div>
+              )}
+            </div>
+
+            <div style={styles.formGroup}>
+              <label htmlFor="diastolic" style={styles.label}>
+                Diastolic <span style={styles.required}>*</span>
+              </label>
+              <input
+                id="diastolic"
+                type="number"
+                value={diastolic}
+                onChange={(e) => setDiastolic(e.target.value)}
+                style={{
+                  ...styles.input,
+                  ...(errors.diastolic ? styles.inputError : {}),
+                }}
+                placeholder="80"
+                aria-required="true"
+                aria-invalid={!!errors.diastolic}
+              />
+              {errors.diastolic && (
+                <div style={styles.errorContainer}>
+                  <span style={styles.errorText}>{errors.diastolic}</span>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* Systolic */}
-          <div style={styles.formGroup}>
-            <label htmlFor="systolic" style={styles.label}>
-              Systolic (mmHg) <span style={styles.required}>*</span>
-            </label>
-            <input
-              id="systolic"
-              type="number"
-              value={systolic}
-              onChange={(e) => setSystolic(e.target.value)}
-              style={{
-                ...styles.input,
-                ...(errors.systolic ? styles.inputError : {}),
-              }}
-              placeholder="120"
-              aria-required="true"
-              aria-invalid={!!errors.systolic}
-            />
-            {errors.systolic && (
-              <span style={styles.errorText}>{errors.systolic}</span>
-            )}
-          </div>
+          {/* Pulse & Position Row */}
+          <div style={styles.row}>
+            <div style={styles.formGroup}>
+              <label htmlFor="pulse" style={styles.label}>
+                Pulse (bpm)
+              </label>
+              <input
+                id="pulse"
+                type="number"
+                value={pulse}
+                onChange={(e) => setPulse(e.target.value)}
+                style={styles.input}
+                placeholder="72"
+              />
+            </div>
 
-          {/* Diastolic */}
-          <div style={styles.formGroup}>
-            <label htmlFor="diastolic" style={styles.label}>
-              Diastolic (mmHg) <span style={styles.required}>*</span>
-            </label>
-            <input
-              id="diastolic"
-              type="number"
-              value={diastolic}
-              onChange={(e) => setDiastolic(e.target.value)}
-              style={{
-                ...styles.input,
-                ...(errors.diastolic ? styles.inputError : {}),
-              }}
-              placeholder="80"
-              aria-required="true"
-              aria-invalid={!!errors.diastolic}
-            />
-            {errors.diastolic && (
-              <span style={styles.errorText}>{errors.diastolic}</span>
-            )}
-          </div>
-
-          {/* Pulse */}
-          <div style={styles.formGroup}>
-            <label htmlFor="pulse" style={styles.label}>
-              Pulse (bpm)
-            </label>
-            <input
-              id="pulse"
-              type="number"
-              value={pulse}
-              onChange={(e) => setPulse(e.target.value)}
-              style={styles.input}
-              placeholder="72"
-            />
-          </div>
-
-          {/* Body Position */}
-          <div style={styles.formGroup}>
-            <label htmlFor="bodyPosition" style={styles.label}>
-              Body Position <span style={styles.required}>*</span>
-            </label>
-            <select
-              id="bodyPosition"
-              value={bodyPosition}
-              onChange={(e) =>
-                setBodyPosition(
-                  e.target.value as "seated" | "leaning" | "laying"
-                )
-              }
-              style={styles.select}
-              aria-required="true"
-            >
-              <option value="seated">Seated</option>
-              <option value="leaning">Leaning</option>
-              <option value="laying">Laying Down</option>
-            </select>
+            <div style={styles.formGroup}>
+              <label htmlFor="bodyPosition" style={styles.label}>
+                Position <span style={styles.required}>*</span>
+              </label>
+              <select
+                id="bodyPosition"
+                value={bodyPosition}
+                onChange={(e) =>
+                  setBodyPosition(
+                    e.target.value as "seated" | "leaning" | "laying"
+                  )
+                }
+                style={styles.select}
+                aria-required="true"
+              >
+                <option value="seated">Seated</option>
+                <option value="leaning">Leaning</option>
+                <option value="laying">Laying</option>
+              </select>
+            </div>
           </div>
         </div>
 
@@ -259,8 +266,8 @@ export function ReadingForm({
             value={note}
             onChange={(e) => setNote(e.target.value)}
             style={styles.textarea}
-            placeholder="Add any relevant notes (e.g., after exercise, feeling stressed, etc.)"
-            rows={3}
+            placeholder="Add any relevant notes..."
+            rows={2}
           />
         </div>
 
@@ -321,76 +328,92 @@ const styles: { [key: string]: React.CSSProperties } = {
     position: "relative",
   },
   cardHeader: {
-    padding: "20px",
+    padding: "16px",
     borderBottom: "1px solid #f5f5f5",
     backgroundColor: "transparent",
   },
   cardTitle: {
     margin: 0,
-    fontSize: "17px",
+    fontSize: "16px",
     fontWeight: "600",
     color: "#0a0a0a",
     letterSpacing: "-0.01em",
   },
   form: {
-    padding: "20px",
+    padding: "16px",
   },
   grid: {
     display: "flex",
     flexDirection: "column",
-    gap: "16px",
-    marginBottom: "16px",
+    gap: "12px",
+    marginBottom: "12px",
+  },
+  row: {
+    display: "flex",
+    gap: "12px",
+    alignItems: "flex-start",
+    width: "100%",
   },
   formGroup: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
+    gap: "6px",
+    flex: 1,
+    justifyContent: "flex-start",
+    minWidth: 0, // Allow flex items to shrink below their content size
   },
   label: {
-    fontSize: "13px",
+    fontSize: "12px",
     fontWeight: "500",
     color: "#525252",
-  },
-  required: {
-    color: "#ef4444",
+    lineHeight: "1.4",
+    minHeight: "17px", // Ensure consistent label height
   },
   input: {
-    padding: "14px 16px",
-    fontSize: "16px",
+    padding: "12px 14px",
+    fontSize: "14px",
     border: "1px solid #e5e5e5",
-    borderRadius: "12px",
+    borderRadius: "10px",
     outline: "none",
     transition: "all 0.2s",
     backgroundColor: "#fafafa",
-  },
-  inputError: {
-    borderColor: "#ef4444",
-    backgroundColor: "#fef2f2",
+    height: "44px", // Consistent height for all inputs
+    boxSizing: "border-box",
+    width: "100%", // Ensure full width
   },
   select: {
-    padding: "14px 16px",
-    fontSize: "16px",
+    padding: "12px 14px",
+    fontSize: "14px",
     border: "1px solid #e5e5e5",
-    borderRadius: "12px",
+    borderRadius: "10px",
     outline: "none",
     transition: "all 0.2s",
     backgroundColor: "#fafafa",
     cursor: "pointer",
+    height: "44px", // Consistent height for select
+    boxSizing: "border-box",
+    width: "100%", // Ensure full width
   },
   textarea: {
-    padding: "14px 16px",
-    fontSize: "16px",
+    padding: "12px 14px",
+    fontSize: "14px",
     border: "1px solid #e5e5e5",
-    borderRadius: "12px",
+    borderRadius: "10px",
     outline: "none",
     transition: "all 0.2s",
     backgroundColor: "#fafafa",
     fontFamily: "inherit",
     resize: "vertical",
+    width: "100%", // Ensure full width
   },
   errorText: {
     fontSize: "12px",
     color: "#ef4444",
+  },
+  errorContainer: {
+    minHeight: "16px", // Reserve space for error messages
+    display: "flex",
+    alignItems: "center",
   },
   infoBox: {
     padding: "10px 12px",
@@ -412,31 +435,31 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   actions: {
     display: "flex",
-    gap: "10px",
-    marginTop: "20px",
+    gap: "8px",
+    marginTop: "16px",
   },
   buttonPrimary: {
     flex: 1,
-    padding: "16px 24px",
+    padding: "12px 16px",
     fontSize: "14px",
     fontWeight: "600",
     color: "#ffffff",
     background: "linear-gradient(135deg, #6B7CF5 0%, #5B6CF4 100%)",
     border: "none",
-    borderRadius: "12px",
+    borderRadius: "10px",
     cursor: "pointer",
     transition: "all 0.2s",
     boxShadow: "0 4px 12px rgba(107, 124, 245, 0.25)",
   },
   buttonSecondary: {
     flex: 1,
-    padding: "16px 24px",
+    padding: "12px 16px",
     fontSize: "14px",
     fontWeight: "500",
     color: "#525252",
     backgroundColor: "transparent",
     border: "1px solid #e5e5e5",
-    borderRadius: "12px",
+    borderRadius: "10px",
     cursor: "pointer",
     transition: "all 0.2s",
   },

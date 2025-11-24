@@ -92,7 +92,7 @@ export function ReadingsList({
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <h2 style={styles.headerTitle}>Recent Readings</h2>
+        <h2 style={styles.headerTitle}>Readings</h2>
         <span style={styles.badge}>{readings.length}</span>
       </div>
 
