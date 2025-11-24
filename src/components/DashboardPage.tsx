@@ -73,7 +73,7 @@ export function DashboardPage({
     <div style={styles.container}>
       {/* Header */}
       <div style={styles.header}>
-        <h1 style={styles.greeting}>Hello, {userName || "User"}</h1>
+        <h3 style={styles.greeting}>Hello, {userName || "User"}</h3>
         <p style={styles.subGreeting}>Here's your blood pressure overview</p>
       </div>
 
@@ -82,7 +82,26 @@ export function DashboardPage({
           {/* Main Stats Grid */}
           <div style={styles.statsGrid}>
             {/* Average BP Card */}
-            <div style={styles.statCard}>
+            <div
+              style={{
+                ...styles.statCard,
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: -20,
+                  right: -20,
+                  width: 80,
+                  height: 80,
+                  background:
+                    "linear-gradient(135deg, #6B7CF5 0%, #5B6CF4 100%)",
+                  borderRadius: "50%",
+                  opacity: 0.08,
+                }}
+              />
               <div style={styles.cardHeader}>
                 <div
                   style={{ ...styles.iconCircle, backgroundColor: "#EEF2FF" }}
@@ -100,7 +119,26 @@ export function DashboardPage({
             </div>
 
             {/* Highest Reading Card */}
-            <div style={styles.statCard}>
+            <div
+              style={{
+                ...styles.statCard,
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: -20,
+                  right: -20,
+                  width: 80,
+                  height: 80,
+                  background:
+                    "linear-gradient(135deg, #EF4444 0%, #DC2626 100%)",
+                  borderRadius: "50%",
+                  opacity: 0.08,
+                }}
+              />
               <div style={styles.cardHeader}>
                 <div
                   style={{ ...styles.iconCircle, backgroundColor: "#FEF2F2" }}
@@ -118,7 +156,26 @@ export function DashboardPage({
             </div>
 
             {/* Lowest Reading Card */}
-            <div style={styles.statCard}>
+            <div
+              style={{
+                ...styles.statCard,
+                position: "relative",
+                overflow: "hidden",
+              }}
+            >
+              <div
+                style={{
+                  position: "absolute",
+                  top: -20,
+                  right: -20,
+                  width: 80,
+                  height: 80,
+                  background:
+                    "linear-gradient(135deg, #10B981 0%, #059669 100%)",
+                  borderRadius: "50%",
+                  opacity: 0.08,
+                }}
+              />
               <div style={styles.cardHeader}>
                 <div
                   style={{ ...styles.iconCircle, backgroundColor: "#ECFDF5" }}
@@ -137,7 +194,26 @@ export function DashboardPage({
 
             {/* Average Pulse Card */}
             {stats.avgPulse && (
-              <div style={styles.statCard}>
+              <div
+                style={{
+                  ...styles.statCard,
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    top: -20,
+                    right: -20,
+                    width: 80,
+                    height: 80,
+                    background:
+                      "linear-gradient(135deg, #EC4899 0%, #DB2777 100%)",
+                    borderRadius: "50%",
+                    opacity: 0.08,
+                  }}
+                />
                 <div style={styles.cardHeader}>
                   <div
                     style={{ ...styles.iconCircle, backgroundColor: "#FDF2F8" }}
@@ -155,7 +231,25 @@ export function DashboardPage({
           </div>
 
           {/* Body Position Card */}
-          <div style={styles.positionCard}>
+          <div
+            style={{
+              ...styles.positionCard,
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                top: -30,
+                right: -30,
+                width: 120,
+                height: 120,
+                background: "linear-gradient(135deg, #6B7CF5 0%, #5B6CF4 100%)",
+                borderRadius: "50%",
+                opacity: 0.08,
+              }}
+            />
             <div style={styles.positionHeader}>
               <h3 style={styles.positionTitle}>Readings by Body Position</h3>
               <span style={styles.totalBadge}>{stats.totalReadings} total</span>
@@ -261,7 +355,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     textTransform: "capitalize",
   },
   subGreeting: {
-    margin: "4px 0 0 0",
     fontSize: "14px",
     color: "#737373",
   },
@@ -421,9 +514,9 @@ const styles: { [key: string]: React.CSSProperties } = {
     position: "fixed",
     bottom: "90px",
     right: "50%",
-    transform: "translateX(calc(215px - 32px))",
-    width: "56px",
-    height: "56px",
+    transform: "translateX(calc(215px - 20px))",
+    width: "50px",
+    height: "50px",
     borderRadius: "50%",
     background: "linear-gradient(135deg, #6B7CF5 0%, #5B6CF4 100%)",
     color: "#ffffff",
@@ -435,5 +528,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     boxShadow: "0 6px 20px rgba(107, 124, 245, 0.4)",
     zIndex: 45,
     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    opacity: 0.8,
   },
 };

@@ -344,8 +344,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     minHeight: "100vh",
     display: "flex",
     flexDirection: "column",
-    background:
-      "linear-gradient(180deg, #C7D2FE 0%, #DDD6FE 50%, #E9D5FF 100%)",
+    background: "#fefefe",
     maxWidth: "430px",
     margin: "0 auto",
     position: "relative",
@@ -385,6 +384,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     top: 0,
     zIndex: 40,
     boxShadow: "0 4px 12px rgba(107, 124, 245, 0.15)",
+    borderRadius: "0px 0px 10px 10px",
   },
   headerContent: {
     display: "flex",

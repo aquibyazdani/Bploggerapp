@@ -124,11 +124,11 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   fab: {
     position: "fixed",
-    bottom: "120px", // Adjusted from 90px to account for branding footer
+    bottom: "90px",
     right: "50%",
-    transform: "translateX(calc(215px - 32px))",
-    width: "56px",
-    height: "56px",
+    transform: "translateX(calc(215px - 20px))",
+    width: "50px",
+    height: "50px",
     borderRadius: "50%",
     background: "linear-gradient(135deg, #6B7CF5 0%, #5B6CF4 100%)",
     color: "#ffffff",
@@ -140,5 +140,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     boxShadow: "0 6px 20px rgba(107, 124, 245, 0.4)",
     zIndex: 45,
     transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    opacity: 0.8,
   },
 };

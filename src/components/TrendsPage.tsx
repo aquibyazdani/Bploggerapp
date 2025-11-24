@@ -120,7 +120,25 @@ export function TrendsPage({ readings }: TrendsPageProps) {
 
       {/* Stats Grid */}
       <div style={styles.statsGrid}>
-        <div style={styles.statCard}>
+        <div
+          style={{
+            ...styles.statCard,
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: -20,
+              right: -20,
+              width: 80,
+              height: 80,
+              background: "linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)",
+              borderRadius: "50%",
+              opacity: 0.08,
+            }}
+          />
           <div style={styles.statIcon}>
             <BarChart3 size={32} color="#3b82f6" />
           </div>
@@ -132,7 +150,25 @@ export function TrendsPage({ readings }: TrendsPageProps) {
           </div>
         </div>
 
-        <div style={styles.statCard}>
+        <div
+          style={{
+            ...styles.statCard,
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: -20,
+              right: -20,
+              width: 80,
+              height: 80,
+              background: "linear-gradient(135deg, #EF4444 0%, #DC2626 100%)",
+              borderRadius: "50%",
+              opacity: 0.08,
+            }}
+          />
           <div style={styles.statIcon}>
             <ArrowUp size={32} color="#ef4444" />
           </div>
@@ -144,7 +180,25 @@ export function TrendsPage({ readings }: TrendsPageProps) {
           </div>
         </div>
 
-        <div style={styles.statCard}>
+        <div
+          style={{
+            ...styles.statCard,
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: -20,
+              right: -20,
+              width: 80,
+              height: 80,
+              background: "linear-gradient(135deg, #10B981 0%, #059669 100%)",
+              borderRadius: "50%",
+              opacity: 0.08,
+            }}
+          />
           <div style={styles.statIcon}>
             <ArrowDown size={32} color="#10b981" />
           </div>
@@ -156,7 +210,25 @@ export function TrendsPage({ readings }: TrendsPageProps) {
           </div>
         </div>
 
-        <div style={styles.statCard}>
+        <div
+          style={{
+            ...styles.statCard,
+            position: "relative",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              position: "absolute",
+              top: -20,
+              right: -20,
+              width: 80,
+              height: 80,
+              background: "linear-gradient(135deg, #EC4899 0%, #DB2777 100%)",
+              borderRadius: "50%",
+              opacity: 0.08,
+            }}
+          />
           <div style={styles.statIcon}>
             <Heart size={32} color="#ec4899" />
           </div>
@@ -170,7 +242,19 @@ export function TrendsPage({ readings }: TrendsPageProps) {
       </div>
 
       {/* Body Position Distribution */}
-      <div style={styles.card}>
+      <div style={{ ...styles.card, position: "relative", overflow: "hidden" }}>
+        <div
+          style={{
+            position: "absolute",
+            top: -30,
+            right: -30,
+            width: 120,
+            height: 120,
+            background: "linear-gradient(135deg, #6B7CF5 0%, #5B6CF4 100%)",
+            borderRadius: "50%",
+            opacity: 0.08,
+          }}
+        />
         <div style={styles.cardHeader}>
           <h2 style={styles.cardTitle}>Readings by Body Position</h2>
         </div>

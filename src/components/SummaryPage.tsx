@@ -622,7 +622,19 @@ export function SummaryPage({ readings }: SummaryPageProps) {
       </div>
 
       {/* Export Section */}
-      <div style={styles.card}>
+      <div style={{ ...styles.card, position: "relative", overflow: "hidden" }}>
+        <div
+          style={{
+            position: "absolute",
+            top: -30,
+            right: -30,
+            width: 120,
+            height: 120,
+            background: "linear-gradient(135deg, #6B7CF5 0%, #5B6CF4 100%)",
+            borderRadius: "50%",
+            opacity: 0.08,
+          }}
+        />
         <div style={styles.cardHeader}>
           <h2 style={styles.cardTitle}>Export Data</h2>
         </div>
