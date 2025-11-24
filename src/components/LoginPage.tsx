@@ -172,12 +172,13 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: "#374151",
   },
   input: {
-    padding: "12px 16px",
+    padding: "12px 40px 12px 16px",
     border: "1px solid #D1D5DB",
     borderRadius: "8px",
     fontSize: "16px",
     outline: "none",
     transition: "border-color 0.2s",
+    width: "100%",
   },
   passwordContainer: {
     position: "relative",
@@ -191,6 +192,10 @@ const styles: { [key: string]: React.CSSProperties } = {
     border: "none",
     color: "#6B7280",
     cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: "4px",
   },
   button: {
     background: "linear-gradient(135deg, #6B7CF5 0%, #5B6CF4 100%)",
