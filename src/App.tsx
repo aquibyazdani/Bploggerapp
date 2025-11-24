@@ -312,6 +312,21 @@ function AppContent() {
           <span style={styles.bottomNavLabel}>Summary</span>
         </button>
       </nav>
+
+      {/* Branding Footer */}
+      <footer style={styles.brandingFooter}>
+        <p style={styles.brandingText}>
+          Created by{" "}
+          <a
+            href="https://aquibyazdani.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={styles.brandingLink}
+          >
+            Aquib Yazdani
+          </a>
+        </p>
+      </footer>
     </div>
   );
 }
@@ -400,7 +415,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     flex: 1,
     width: "100%",
     margin: "0",
-    padding: "16px 16px 90px 16px",
+    padding: "16px 16px 120px 16px", // Increased from 90px to 120px for branding footer
     overflowY: "auto",
   },
   bottomNav: {
@@ -442,6 +457,31 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: "11px",
     fontWeight: "500",
     letterSpacing: "0.01em",
+  },
+  brandingFooter: {
+    position: "fixed",
+    bottom: 0,
+    left: "50%",
+    transform: "translateX(-50%)",
+    width: "100%",
+    maxWidth: "430px",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backdropFilter: "blur(10px)",
+    borderTop: "1px solid rgba(0, 0, 0, 0.05)",
+    padding: "8px 16px",
+    textAlign: "center",
+    zIndex: 40,
+  },
+  brandingText: {
+    margin: 0,
+    fontSize: "10px",
+    color: "#6B7280",
+    fontWeight: "400",
+  },
+  brandingLink: {
+    color: "#6B7CF5",
+    textDecoration: "none",
+    fontWeight: "500",
   },
   footer: {
     display: "none",

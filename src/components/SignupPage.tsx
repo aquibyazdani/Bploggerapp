@@ -136,8 +136,19 @@ export const SignupPage: React.FC = () => {
               onClick={() => (window.location.hash = "#login")}
               style={styles.linkButton}
             >
-              Sign in
+              Log in
             </button>
+          </p>
+          <p style={styles.brandingText}>
+            Created by{" "}
+            <a
+              href="https://aquibyazdani.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={styles.brandingLink}
+            >
+              Aquib Yazdani
+            </a>
           </p>
         </div>
       </div>
@@ -258,5 +269,15 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: "600",
     cursor: "pointer",
     textDecoration: "underline",
+  },
+  brandingText: {
+    margin: "8px 0 0 0",
+    fontSize: "12px",
+    color: "#9CA3AF",
+  },
+  brandingLink: {
+    color: "#6B7CF5",
+    textDecoration: "none",
+    fontWeight: "500",
   },
 };
