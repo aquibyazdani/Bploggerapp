@@ -144,6 +144,7 @@ function AppContent() {
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
+            timestamp: updatedReading.timestamp,
             systolic: updatedReading.systolic,
             diastolic: updatedReading.diastolic,
             pulse: updatedReading.pulse,
