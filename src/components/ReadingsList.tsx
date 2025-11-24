@@ -106,6 +106,7 @@ export function ReadingsList({
               key={reading._id}
               style={{
                 ...styles.card,
+                padding: "5px",
                 ...(isEditing ? styles.cardEditing : {}),
               }}
             >
