@@ -283,7 +283,11 @@ function AppContent() {
           <span style={styles.bottomNavLabel}>Dashboard</span>
         </button>
         <button
-          onClick={() => setCurrentPage("readings")}
+          onClick={() => {
+            setCurrentPage("readings");
+            setShowForm(false);
+            setEditingReading(null);
+          }}
           style={{
             ...styles.bottomNavButton,
             ...(currentPage === "readings" ? styles.bottomNavButtonActive : {}),
