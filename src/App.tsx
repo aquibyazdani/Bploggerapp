@@ -16,6 +16,7 @@ import { TrendsPage } from "./components/TrendsPage";
 import { SummaryPage } from "./components/SummaryPage";
 import { LoginPage } from "./components/LoginPage";
 import { SignupPage } from "./components/SignupPage";
+import { AddToHomescreenModal } from "./components/AddToHomescreenModal";
 import {
   Activity,
   Home,
@@ -44,6 +45,9 @@ function AppContent() {
   const [editingReading, setEditingReading] = useState<Reading | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [authPage, setAuthPage] = useState<"login" | "signup">("login");
+  const [showAddToHomescreenModal, setShowAddToHomescreenModal] =
+    useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   // Load readings from API
   const loadReadings = async () => {
@@ -73,6 +77,16 @@ function AppContent() {
       loadReadings();
       // Clear hash when user is authenticated
       window.location.hash = "";
+
+      // Show Add to Homescreen modal after 30 seconds
+      const timer = setTimeout(() => {
+        // Check if the app is not already installed
+        if (!window.matchMedia("(display-mode: standalone)").matches) {
+          setShowAddToHomescreenModal(true);
+        }
+      }, 30000); // 30 seconds
+
+      return () => clearTimeout(timer);
     }
   }, [user, token]);
 
@@ -97,6 +111,58 @@ function AppContent() {
       window.removeEventListener("hashchange", handleHashChange);
     };
   }, []);
+
+  // Listen for PWA install prompt
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      // Prevent the mini-infobar from appearing on mobile
+      e.preventDefault();
+      // Store the event so it can be triggered later
+      setDeferredPrompt(e);
+    };
+
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt
+      );
+    };
+  }, []);
+
+  // Handle PWA installation
+  const handleInstallApp = async () => {
+    if (!deferredPrompt) {
+      // Fallback for iOS - try to guide user to share menu
+      handleIOSInstall();
+      return;
+    }
+
+    // Show the install prompt
+    deferredPrompt.prompt();
+
+    // Wait for the user to respond to the prompt
+    const { outcome } = await deferredPrompt.userChoice;
+
+    // Clear the deferred prompt
+    setDeferredPrompt(null);
+
+    if (outcome === "accepted") {
+      console.log("User accepted the install prompt");
+      setShowAddToHomescreenModal(false);
+    } else {
+      console.log("User dismissed the install prompt");
+    }
+  };
+
+  // Handle iOS installation (fallback)
+  const handleIOSInstall = () => {
+    // On iOS, we can't programmatically install, but we can try to guide the user
+    // The modal will show iOS-specific instructions
+    // We could potentially try to trigger the share menu, but it's unreliable
+    console.log("iOS installation - showing instructions");
+  };
 
   const handleAddReading = async (
     reading: Omit<Reading, "_id" | "timestamp">
@@ -332,6 +398,14 @@ function AppContent() {
           </a>
         </p>
       </footer>
+
+      {/* Add to Homescreen Modal */}
+      <AddToHomescreenModal
+        isOpen={showAddToHomescreenModal}
+        onClose={() => setShowAddToHomescreenModal(false)}
+        onInstall={handleInstallApp}
+        canInstall={!!deferredPrompt}
+      />
     </div>
   );
 }
