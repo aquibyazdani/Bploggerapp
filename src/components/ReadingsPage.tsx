@@ -72,12 +72,14 @@ export function ReadingsPage({
         />
       )}
 
-      <ReadingsList
-        readings={readings}
-        onEdit={handleEdit}
-        onDelete={onDelete}
-        editingId={editingReading?._id}
-      />
+      {!showForm && (
+        <ReadingsList
+          readings={readings}
+          onEdit={handleEdit}
+          onDelete={onDelete}
+          editingId={editingReading?._id}
+        />
+      )}
 
       {/* Floating Action Button */}
       <button
