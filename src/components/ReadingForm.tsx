@@ -76,11 +76,11 @@ export function ReadingForm({
     const diastolicNum = Number(diastolic);
 
     if (!systolic || systolicNum <= 0 || !Number.isInteger(systolicNum)) {
-      newErrors.systolic = "Systolic must be a positive whole number";
+      newErrors.systolic = "Systolic must be a filled";
     }
 
     if (!diastolic || diastolicNum <= 0 || !Number.isInteger(diastolicNum)) {
-      newErrors.diastolic = "Diastolic must be a positive whole number";
+      newErrors.diastolic = "Diastolic must be a filled";
     }
 
     setErrors(newErrors);

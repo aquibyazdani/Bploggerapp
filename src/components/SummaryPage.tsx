@@ -299,16 +299,19 @@ export function SummaryPage({ readings }: SummaryPageProps) {
               ...styles.cardHeader,
               background: `linear-gradient(135deg, ${category.color}15 0%, ${category.color}05 100%)`,
               borderBottom: `2px solid ${category.color}30`,
+              padding: "12px",
             }}
           >
-            <h2 style={styles.cardTitle}>Latest Reading</h2>
+            <h2 style={{ ...styles.cardTitle, fontSize: "14px" }}>
+              Latest Reading
+            </h2>
             <div style={styles.latestHeaderInfo}>
               <span style={styles.latestHeaderDate}>
-                <Calendar size={14} />
+                <Calendar size={12} />
                 {formatDisplayDate(lastReading.timestamp)}
               </span>
               <span style={styles.latestHeaderTime}>
-                <Clock size={14} />
+                <Clock size={12} />
                 {formatDisplayTime(lastReading.timestamp)}
               </span>
             </div>
@@ -318,64 +321,90 @@ export function SummaryPage({ readings }: SummaryPageProps) {
               ...styles.latestReading,
               background: `linear-gradient(180deg, ${category.color}03 0%, transparent 100%)`,
               padding: "20px",
-              gap: "16px",
+              gap: "8px",
             }}
           >
-            {/* Main BP Display */}
-            <div style={{ ...styles.latestBP, gap: "4px" }}>
-              <div style={styles.bpNumbersRow}>
-                <span style={{ ...styles.latestValue, color: category.color }}>
-                  {lastReading.systolic}
-                </span>
-                <span style={styles.bpDivider}>/</span>
-                <span style={{ ...styles.latestValue, color: category.color }}>
-                  {lastReading.diastolic}
-                </span>
+            {/* BP Reading, Heart Rate and Position in Same Row */}
+            <div style={styles.readingRow}>
+              {/* Main BP Display */}
+              <div style={{ ...styles.latestBP, gap: "2px" }}>
+                <div style={styles.bpNumbersRow}>
+                  <span
+                    style={{
+                      ...styles.latestValue,
+                      color: category.color,
+                      fontSize: "20px",
+                    }}
+                  >
+                    {lastReading.systolic}
+                  </span>
+                  <span style={{ ...styles.bpDivider, fontSize: "20px" }}>
+                    /
+                  </span>
+                  <span
+                    style={{
+                      ...styles.latestValue,
+                      color: category.color,
+                      fontSize: "20px",
+                    }}
+                  >
+                    {lastReading.diastolic}
+                  </span>
+                </div>
+                <span style={styles.latestLabel}>mmHg</span>
               </div>
-              <span style={styles.latestLabel}>mmHg</span>
-            </div>
 
-            {/* Additional Info Grid */}
-            <div style={styles.latestInfoGrid}>
+              {/* Heart Rate */}
               {lastReading.pulse && (
-                <div style={styles.latestInfoItem}>
+                <div style={styles.readingRowItem}>
                   <div
                     style={{
                       ...styles.latestInfoIcon,
-                      backgroundColor: "#fce7f3",
+                      width: "24px",
+                      height: "24px",
                     }}
                   >
-                    <Heart size={16} color="#ec4899" />
+                    <Heart size={12} color="#ec4899" />
                   </div>
                   <div style={styles.latestInfoText}>
-                    <span style={styles.latestInfoLabel}>Pulse</span>
-                    <span style={styles.latestInfoValue}>
+                    <span
+                      style={{ ...styles.latestInfoLabel, fontSize: "11px" }}
+                    >
+                      Pulse
+                    </span>
+                    <span
+                      style={{ ...styles.latestInfoValue, fontSize: "13px" }}
+                    >
                       {lastReading.pulse} bpm
                     </span>
                   </div>
                 </div>
               )}
 
-              <div style={styles.latestInfoItem}>
+              {/* Position */}
+              <div style={styles.readingRowItem}>
                 <div
                   style={{
                     ...styles.latestInfoIcon,
-                    backgroundColor: "#e0e7ff",
+                    width: "24px",
+                    height: "24px",
                   }}
                 >
                   {lastReading.bodyPosition === "seated" && (
-                    <Armchair size={16} color="#6366f1" />
+                    <Armchair size={12} color="#6366f1" />
                   )}
                   {lastReading.bodyPosition === "leaning" && (
-                    <User size={16} color="#6366f1" />
+                    <User size={12} color="#6366f1" />
                   )}
                   {lastReading.bodyPosition === "laying" && (
-                    <Bed size={16} color="#6366f1" />
+                    <Bed size={12} color="#6366f1" />
                   )}
                 </div>
                 <div style={styles.latestInfoText}>
-                  <span style={styles.latestInfoLabel}>Position</span>
-                  <span style={styles.latestInfoValue}>
+                  <span style={{ ...styles.latestInfoLabel, fontSize: "11px" }}>
+                    Position
+                  </span>
+                  <span style={{ ...styles.latestInfoValue, fontSize: "13px" }}>
                     {lastReading.bodyPosition.charAt(0).toUpperCase() +
                       lastReading.bodyPosition.slice(1)}
                   </span>
@@ -389,16 +418,16 @@ export function SummaryPage({ readings }: SummaryPageProps) {
                 ...styles.categoryMessageBox,
                 backgroundColor: `${category.color}10`,
                 borderLeft: `3px solid ${category.color}`,
-                padding: "10px 12px",
-                marginTop: "4px",
+                padding: "6px 8px",
+                marginTop: "2px",
               }}
             >
-              <Lightbulb size={14} color={category.color} />
+              <Lightbulb size={12} color={category.color} />
               <p
                 style={{
                   ...styles.categoryMessage,
                   color: category.color,
-                  fontSize: "12px",
+                  fontSize: "11px",
                   margin: 0,
                 }}
               >
@@ -411,12 +440,16 @@ export function SummaryPage({ readings }: SummaryPageProps) {
               <div
                 style={{
                   ...styles.latestNote,
-                  padding: "12px",
-                  marginTop: "4px",
+                  padding: "5px",
+                  marginTop: "2px",
                 }}
               >
-                <span style={styles.latestNoteLabel}>Note:</span>
-                <p style={styles.latestNoteText}>{lastReading.note}</p>
+                <span style={{ ...styles.latestNoteLabel, fontSize: "11px" }}>
+                  Note:
+                </span>
+                <p style={{ ...styles.latestNoteText, fontSize: "12px" }}>
+                  {lastReading.note}
+                </p>
               </div>
             )}
           </div>
@@ -595,8 +628,8 @@ export function SummaryPage({ readings }: SummaryPageProps) {
         </div>
         <div style={styles.exportSection}>
           <p style={styles.exportDescription}>
-            Export your blood pressure readings as a CSV file for use with
-            spreadsheet software or sharing with your healthcare provider.
+            Export your blood pressure readings as a CSV file for sharing with
+            your healthcare provider.
           </p>
 
           <div style={styles.dateFilters}>
@@ -711,6 +744,9 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: "20px",
     borderBottom: "1px solid #f5f5f5",
     backgroundColor: "transparent",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   cardTitle: {
     margin: 0,
@@ -760,9 +796,9 @@ const styles: { [key: string]: React.CSSProperties } = {
     opacity: 0.8,
   },
   statsGrid: {
-    padding: "20px",
+    padding: "0px",
     display: "grid",
-    gridTemplateColumns: "1fr",
+    gridTemplateColumns: "repeat(2, 1fr)",
     gap: "12px",
   },
   statBox: {
@@ -890,10 +926,10 @@ const styles: { [key: string]: React.CSSProperties } = {
   latestHeaderInfo: {
     display: "flex",
     flexDirection: "row",
-    gap: "16px",
+    gap: "8px",
     alignItems: "center",
     color: "#737373",
-    fontSize: "13px",
+    fontSize: "11px",
   },
   latestHeaderDate: {
     display: "flex",
@@ -973,16 +1009,27 @@ const styles: { [key: string]: React.CSSProperties } = {
     backgroundColor: "#f9fafb",
     borderRadius: "8px",
     border: "1px solid #e5e7eb",
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    overflowWrap: "break-word",
   },
   latestNoteLabel: {
     fontSize: "13px",
     fontWeight: "600",
     color: "#0a0a0a",
   },
-  latestNoteText: {
-    margin: 0,
-    fontSize: "14px",
-    color: "#737373",
-    lineHeight: "1.6",
+  readingRow: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: "16px",
+    width: "100%",
+  },
+  readingRowItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
   },
 };
