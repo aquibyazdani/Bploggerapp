@@ -1,6 +1,15 @@
-import React from 'react';
-import { Reading } from '../App';
-import { Heart, TrendingUp, TrendingDown, Activity, Armchair, User, Bed, Plus } from 'lucide-react';
+import React from "react";
+import { Reading } from "../App";
+import {
+  Heart,
+  TrendingUp,
+  TrendingDown,
+  Activity,
+  Armchair,
+  User,
+  Bed,
+  Plus,
+} from "lucide-react";
 
 interface DashboardPageProps {
   readings: Reading[];
@@ -21,18 +30,22 @@ export function DashboardPage({ readings, onAddClick }: DashboardPageProps) {
       readings.reduce((sum, r) => sum + r.diastolic, 0) / readings.length
     );
 
-    const highest = readings.reduce((max, r) => 
-      (r.systolic > max.systolic) ? r : max
+    const highest = readings.reduce((max, r) =>
+      r.systolic > max.systolic ? r : max
     );
 
-    const lowest = readings.reduce((min, r) => 
-      (r.systolic < min.systolic) ? r : min
+    const lowest = readings.reduce((min, r) =>
+      r.systolic < min.systolic ? r : min
     );
 
-    const readingsWithPulse = readings.filter(r => r.pulse);
-    const avgPulse = readingsWithPulse.length > 0
-      ? Math.round(readingsWithPulse.reduce((sum, r) => sum + (r.pulse || 0), 0) / readingsWithPulse.length)
-      : null;
+    const readingsWithPulse = readings.filter((r) => r.pulse);
+    const avgPulse =
+      readingsWithPulse.length > 0
+        ? Math.round(
+            readingsWithPulse.reduce((sum, r) => sum + (r.pulse || 0), 0) /
+              readingsWithPulse.length
+          )
+        : null;
 
     // Count readings by position
     const positionCounts = readings.reduce((acc, r) => {
@@ -66,7 +79,9 @@ export function DashboardPage({ readings, onAddClick }: DashboardPageProps) {
             {/* Average BP Card */}
             <div style={styles.statCard}>
               <div style={styles.cardHeader}>
-                <div style={{...styles.iconCircle, backgroundColor: '#EEF2FF'}}>
+                <div
+                  style={{ ...styles.iconCircle, backgroundColor: "#EEF2FF" }}
+                >
                   <Heart size={20} color="#6B7CF5" />
                 </div>
                 <span style={styles.cardTitle}>Average BP</span>
@@ -82,7 +97,9 @@ export function DashboardPage({ readings, onAddClick }: DashboardPageProps) {
             {/* Highest Reading Card */}
             <div style={styles.statCard}>
               <div style={styles.cardHeader}>
-                <div style={{...styles.iconCircle, backgroundColor: '#FEF2F2'}}>
+                <div
+                  style={{ ...styles.iconCircle, backgroundColor: "#FEF2F2" }}
+                >
                   <TrendingUp size={20} color="#EF4444" />
                 </div>
                 <span style={styles.cardTitle}>Highest</span>
@@ -98,7 +115,9 @@ export function DashboardPage({ readings, onAddClick }: DashboardPageProps) {
             {/* Lowest Reading Card */}
             <div style={styles.statCard}>
               <div style={styles.cardHeader}>
-                <div style={{...styles.iconCircle, backgroundColor: '#ECFDF5'}}>
+                <div
+                  style={{ ...styles.iconCircle, backgroundColor: "#ECFDF5" }}
+                >
                   <TrendingDown size={20} color="#10B981" />
                 </div>
                 <span style={styles.cardTitle}>Lowest</span>
@@ -115,7 +134,9 @@ export function DashboardPage({ readings, onAddClick }: DashboardPageProps) {
             {stats.avgPulse && (
               <div style={styles.statCard}>
                 <div style={styles.cardHeader}>
-                  <div style={{...styles.iconCircle, backgroundColor: '#FDF2F8'}}>
+                  <div
+                    style={{ ...styles.iconCircle, backgroundColor: "#FDF2F8" }}
+                  >
                     <Activity size={20} color="#EC4899" />
                   </div>
                   <span style={styles.cardTitle}>Avg Pulse</span>
@@ -137,29 +158,50 @@ export function DashboardPage({ readings, onAddClick }: DashboardPageProps) {
             <div style={styles.positionGrid}>
               {/* Seated */}
               <div style={styles.positionItem}>
-                <div style={{...styles.positionIconCircle, backgroundColor: '#EEF2FF'}}>
+                <div
+                  style={{
+                    ...styles.positionIconCircle,
+                    backgroundColor: "#EEF2FF",
+                  }}
+                >
                   <Armchair size={24} color="#6B7CF5" />
                 </div>
                 <span style={styles.positionLabel}>Seated</span>
-                <span style={styles.positionCount}>{stats.positionCounts.seated || 0}</span>
+                <span style={styles.positionCount}>
+                  {stats.positionCounts.seated || 0}
+                </span>
               </div>
 
               {/* Leaning */}
               <div style={styles.positionItem}>
-                <div style={{...styles.positionIconCircle, backgroundColor: '#EFF6FF'}}>
+                <div
+                  style={{
+                    ...styles.positionIconCircle,
+                    backgroundColor: "#EFF6FF",
+                  }}
+                >
                   <User size={24} color="#3B82F6" />
                 </div>
                 <span style={styles.positionLabel}>Leaning</span>
-                <span style={styles.positionCount}>{stats.positionCounts.leaning || 0}</span>
+                <span style={styles.positionCount}>
+                  {stats.positionCounts.leaning || 0}
+                </span>
               </div>
 
               {/* Laying */}
               <div style={styles.positionItem}>
-                <div style={{...styles.positionIconCircle, backgroundColor: '#ECFDF5'}}>
+                <div
+                  style={{
+                    ...styles.positionIconCircle,
+                    backgroundColor: "#ECFDF5",
+                  }}
+                >
                   <Bed size={24} color="#10B981" />
                 </div>
                 <span style={styles.positionLabel}>Laying</span>
-                <span style={styles.positionCount}>{stats.positionCounts.laying || 0}</span>
+                <span style={styles.positionCount}>
+                  {stats.positionCounts.laying || 0}
+                </span>
               </div>
             </div>
           </div>
@@ -190,189 +232,192 @@ export function DashboardPage({ readings, onAddClick }: DashboardPageProps) {
 
 const styles: { [key: string]: React.CSSProperties } = {
   container: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '20px',
-    paddingBottom: '20px',
+    display: "flex",
+    flexDirection: "column",
+    gap: "20px",
+    paddingBottom: "20px",
   },
   header: {
-    marginBottom: '8px',
+    marginBottom: "8px",
   },
   greeting: {
     margin: 0,
-    fontSize: '28px',
-    fontWeight: '700',
-    background: 'linear-gradient(135deg, #6B7CF5 0%, #8B5CF6 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text',
-    letterSpacing: '-0.02em',
+    fontSize: "28px",
+    fontWeight: "700",
+    background: "linear-gradient(135deg, #0f1121ff 0%, #030109ff 100%)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    backgroundClip: "text",
+    letterSpacing: "-0.02em",
   },
   subGreeting: {
-    margin: '4px 0 0 0',
-    fontSize: '14px',
-    color: '#737373',
+    margin: "4px 0 0 0",
+    fontSize: "14px",
+    color: "#737373",
   },
   statsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(2, 1fr)',
-    gap: '12px',
+    display: "grid",
+    gridTemplateColumns: "repeat(2, 1fr)",
+    gap: "12px",
   },
   statCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: '20px',
-    padding: '20px',
-    border: '1px solid #f0f0f0',
-    boxShadow: '0 2px 12px rgba(107, 124, 245, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06)',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
+    backgroundColor: "#ffffff",
+    borderRadius: "20px",
+    padding: "20px",
+    border: "1px solid #f0f0f0",
+    boxShadow:
+      "0 2px 12px rgba(107, 124, 245, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06)",
+    display: "flex",
+    flexDirection: "column",
+    gap: "12px",
   },
   cardHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
   },
   iconCircle: {
-    width: '40px',
-    height: '40px',
-    borderRadius: '12px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: "40px",
+    height: "40px",
+    borderRadius: "12px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     flexShrink: 0,
   },
   cardTitle: {
-    fontSize: '13px',
-    fontWeight: '600',
-    color: '#525252',
-    letterSpacing: '-0.01em',
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#525252",
+    letterSpacing: "-0.01em",
   },
   cardValue: {
-    display: 'flex',
-    alignItems: 'baseline',
-    gap: '4px',
-    marginTop: '4px',
+    display: "flex",
+    alignItems: "baseline",
+    gap: "4px",
+    marginTop: "4px",
   },
   bpLarge: {
-    fontSize: '32px',
-    fontWeight: '700',
-    color: '#0a0a0a',
-    lineHeight: '1',
+    fontSize: "32px",
+    fontWeight: "700",
+    color: "#0a0a0a",
+    lineHeight: "1",
   },
   bpSlash: {
-    fontSize: '24px',
-    fontWeight: '300',
-    color: '#d4d4d4',
+    fontSize: "24px",
+    fontWeight: "300",
+    color: "#d4d4d4",
   },
   cardUnit: {
-    fontSize: '12px',
-    color: '#a3a3a3',
-    fontWeight: '500',
+    fontSize: "12px",
+    color: "#a3a3a3",
+    fontWeight: "500",
   },
   positionCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: '20px',
-    padding: '24px',
-    border: '1px solid #f0f0f0',
-    boxShadow: '0 2px 12px rgba(107, 124, 245, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06)',
+    backgroundColor: "#ffffff",
+    borderRadius: "20px",
+    padding: "24px",
+    border: "1px solid #f0f0f0",
+    boxShadow:
+      "0 2px 12px rgba(107, 124, 245, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06)",
   },
   positionHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: '20px',
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: "20px",
   },
   positionTitle: {
     margin: 0,
-    fontSize: '16px',
-    fontWeight: '600',
-    color: '#0a0a0a',
-    letterSpacing: '-0.01em',
+    fontSize: "16px",
+    fontWeight: "600",
+    color: "#0a0a0a",
+    letterSpacing: "-0.01em",
   },
   totalBadge: {
-    padding: '6px 12px',
-    fontSize: '11px',
-    fontWeight: '600',
-    color: '#6B7CF5',
-    backgroundColor: '#f0f0ff',
-    borderRadius: '12px',
+    padding: "6px 12px",
+    fontSize: "11px",
+    fontWeight: "600",
+    color: "#6B7CF5",
+    backgroundColor: "#f0f0ff",
+    borderRadius: "12px",
   },
   positionGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(3, 1fr)',
-    gap: '16px',
+    display: "grid",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: "16px",
   },
   positionItem: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '10px',
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: "10px",
   },
   positionIconCircle: {
-    width: '56px',
-    height: '56px',
-    borderRadius: '16px',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
+    width: "56px",
+    height: "56px",
+    borderRadius: "16px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
   positionLabel: {
-    fontSize: '12px',
-    fontWeight: '600',
-    color: '#525252',
-    textAlign: 'center',
+    fontSize: "12px",
+    fontWeight: "600",
+    color: "#525252",
+    textAlign: "center",
   },
   positionCount: {
-    fontSize: '20px',
-    fontWeight: '700',
-    color: '#0a0a0a',
+    fontSize: "20px",
+    fontWeight: "700",
+    color: "#0a0a0a",
   },
   emptyState: {
-    backgroundColor: '#ffffff',
-    borderRadius: '20px',
-    padding: '60px 24px',
-    border: '1px solid #f0f0f0',
-    boxShadow: '0 2px 12px rgba(107, 124, 245, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06)',
-    textAlign: 'center',
+    backgroundColor: "#ffffff",
+    borderRadius: "20px",
+    padding: "60px 24px",
+    border: "1px solid #f0f0f0",
+    boxShadow:
+      "0 2px 12px rgba(107, 124, 245, 0.08), 0 1px 3px rgba(0, 0, 0, 0.06)",
+    textAlign: "center",
   },
   emptyIcon: {
-    marginBottom: '20px',
-    display: 'flex',
-    justifyContent: 'center',
+    marginBottom: "20px",
+    display: "flex",
+    justifyContent: "center",
   },
   emptyTitle: {
-    margin: '0 0 8px 0',
-    fontSize: '18px',
-    fontWeight: '600',
-    color: '#0a0a0a',
+    margin: "0 0 8px 0",
+    fontSize: "18px",
+    fontWeight: "600",
+    color: "#0a0a0a",
   },
   emptyText: {
     margin: 0,
-    fontSize: '14px',
-    color: '#a3a3a3',
-    lineHeight: '1.5',
-    maxWidth: '280px',
-    marginLeft: 'auto',
-    marginRight: 'auto',
+    fontSize: "14px",
+    color: "#a3a3a3",
+    lineHeight: "1.5",
+    maxWidth: "280px",
+    marginLeft: "auto",
+    marginRight: "auto",
   },
   fab: {
-    position: 'fixed',
-    bottom: '90px',
-    right: '50%',
-    transform: 'translateX(calc(215px - 32px))',
-    width: '56px',
-    height: '56px',
-    borderRadius: '50%',
-    background: 'linear-gradient(135deg, #6B7CF5 0%, #5B6CF4 100%)',
-    color: '#ffffff',
-    border: 'none',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    boxShadow: '0 6px 20px rgba(107, 124, 245, 0.4)',
+    position: "fixed",
+    bottom: "90px",
+    right: "50%",
+    transform: "translateX(calc(215px - 32px))",
+    width: "56px",
+    height: "56px",
+    borderRadius: "50%",
+    background: "linear-gradient(135deg, #6B7CF5 0%, #5B6CF4 100%)",
+    color: "#ffffff",
+    border: "none",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    boxShadow: "0 6px 20px rgba(107, 124, 245, 0.4)",
     zIndex: 45,
-    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
   },
 };
