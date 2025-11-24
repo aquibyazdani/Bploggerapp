@@ -213,7 +213,11 @@ export function DashboardPage({ readings, onAddClick }: DashboardPageProps) {
           </div>
           <h3 style={styles.emptyTitle}>No data yet</h3>
           <p style={styles.emptyText}>
-            Start tracking your blood pressure by adding your first reading
+            Start tracking your blood pressure by adding your first reading.
+            <br />
+            <small style={styles.storageNote}>
+              Your data is stored locally in your browser and won't be shared.
+            </small>
           </p>
         </div>
       )}
@@ -400,6 +404,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     maxWidth: "280px",
     marginLeft: "auto",
     marginRight: "auto",
+  },
+  storageNote: {
+    display: "block",
+    marginTop: "8px",
+    fontSize: "12px",
+    color: "#888",
   },
   fab: {
     position: "fixed",
