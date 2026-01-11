@@ -6,7 +6,6 @@ import { TrendsPage } from "./components/TrendsPage";
 import { SummaryPage } from "./components/SummaryPage";
 import { SettingsPage } from "./components/SettingsPage";
 import { LoginPage } from "./components/LoginPage";
-import { SignupPage } from "./components/SignupPage";
 import { AddToHomescreenModal } from "./components/AddToHomescreenModal";
 import {
   Activity,
@@ -37,7 +36,6 @@ function AppContent() {
   const [readings, setReadings] = useState<Reading[]>([]);
   const [editingReading, setEditingReading] = useState<Reading | null>(null);
   const [showForm, setShowForm] = useState(false);
-  const [authPage, setAuthPage] = useState<"login" | "signup">("login");
   const [showAddToHomescreenModal, setShowAddToHomescreenModal] =
     useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -140,27 +138,6 @@ function AppContent() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentPage]);
 
-  // Check hash for auth page
-  useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash;
-      if (hash === "#signup") {
-        setAuthPage("signup");
-      } else if (hash === "#login") {
-        setAuthPage("login");
-      }
-    };
-
-    // Check initial hash
-    handleHashChange();
-
-    // Listen for hash changes
-    window.addEventListener("hashchange", handleHashChange);
-
-    return () => {
-      window.removeEventListener("hashchange", handleHashChange);
-    };
-  }, []);
 
   // Listen for PWA install prompt
   useEffect(() => {
@@ -341,7 +318,7 @@ function AppContent() {
   }
 
   if (!user) {
-    return authPage === "login" ? <LoginPage /> : <SignupPage />;
+    return <LoginPage />;
   }
 
   return (

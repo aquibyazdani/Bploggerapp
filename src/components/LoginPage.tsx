@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { Activity } from "lucide-react";
 
 export const LoginPage: React.FC = () => {
   const [error, setError] = useState("");
@@ -25,11 +24,29 @@ export const LoginPage: React.FC = () => {
     <div style={styles.container}>
       <div style={styles.card}>
         <div style={styles.header}>
-          <Activity size={32} style={styles.icon} />
-          <h1 style={styles.title}>Welcome Back</h1>
+          <div style={styles.brandRow}>
+            <img src="/logo.png" alt="BP Tracker" style={styles.logo} />
+            <p style={styles.appName}>BP Tracker</p>
+          </div>
+          <h1 style={styles.title}>Track Your BP</h1>
           <p style={styles.subtitle}>
-            Log in to securely access your blood pressure records.
+            Log your blood pressure, spot trends, and keep a private history you
+            can export anytime.
           </p>
+          <div style={styles.featureList}>
+            <div style={styles.featureItem}>
+              <span style={styles.featureIcon}>🩺</span>
+              Share reports with your doctor
+            </div>
+            <div style={styles.featureItem}>
+              <span style={styles.featureIcon}>📈</span>
+              Spot spikes with weekly trends
+            </div>
+            <div style={styles.featureItem}>
+              <span style={styles.featureIcon}>📝</span>
+              Track notes, posture, and pulse
+            </div>
+          </div>
         </div>
 
         <div style={styles.form}>
@@ -44,20 +61,26 @@ export const LoginPage: React.FC = () => {
             disabled={loading}
             onClick={handleLogin}
           >
-            {loading ? "Redirecting..." : "Continue with Auth0"}
+            {loading ? "Redirecting..." : "Sign in"}
+          </button>
+          <button
+            type="button"
+            style={{
+              ...styles.secondaryButton,
+              ...(loading ? styles.buttonDisabled : {}),
+            }}
+            disabled={loading}
+            onClick={() =>
+              login({
+                authorizationParams: { screen_hint: "signup" },
+              })
+            }
+          >
+            Create account
           </button>
         </div>
 
         <div style={styles.footer}>
-          <p style={styles.footerText}>
-            Don't have an account?{" "}
-            <button
-              onClick={() => (window.location.hash = "#signup")}
-              style={styles.linkButton}
-            >
-              Sign up
-            </button>
-          </p>
           <p style={styles.brandingText}>
             Created by{" "}
             <a
@@ -69,6 +92,7 @@ export const LoginPage: React.FC = () => {
               Aquib Yazdani
             </a>
           </p>
+          <p style={styles.madeInText}>Crafted in India with care.</p>
         </div>
       </div>
     </div>
@@ -98,9 +122,25 @@ const styles: { [key: string]: React.CSSProperties } = {
     textAlign: "center",
     marginBottom: "32px",
   },
-  icon: {
+  brandRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    justifyContent: "center",
+    marginBottom: "10px",
+  },
+  appName: {
+    margin: 0,
+    fontSize: "12px",
+    fontWeight: "700",
+    letterSpacing: "0.18em",
+    textTransform: "uppercase",
     color: "var(--primary)",
-    marginBottom: "16px",
+  },
+  logo: {
+    width: "48px",
+    height: "48px",
+    objectFit: "contain",
   },
   title: {
     margin: "0 0 8px 0",
@@ -113,6 +153,36 @@ const styles: { [key: string]: React.CSSProperties } = {
     margin: 0,
     fontSize: "14px",
     color: "var(--muted)",
+  },
+  featureList: {
+    marginTop: "14px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+    textAlign: "left",
+    backgroundColor: "#f7f9ff",
+    borderRadius: "12px",
+    padding: "12px 16px",
+    border: "1px solid rgba(91, 108, 244, 0.15)",
+    boxShadow: "0 8px 18px rgba(15, 23, 42, 0.05)",
+  },
+  featureItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    fontSize: "13px",
+    color: "var(--text-strong)",
+    fontWeight: "500",
+  },
+  featureIcon: {
+    width: "20px",
+    height: "20px",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#eef1ff",
+    borderRadius: "8px",
+    fontSize: "12px",
   },
   form: {
     display: "flex",
@@ -143,23 +213,19 @@ const styles: { [key: string]: React.CSSProperties } = {
     opacity: 0.6,
     cursor: "not-allowed",
   },
-  footer: {
-    marginTop: "24px",
-    textAlign: "center",
-  },
-  footerText: {
-    margin: 0,
-    fontSize: "14px",
-    color: "var(--muted)",
-  },
-  linkButton: {
-    background: "none",
-    border: "none",
+  secondaryButton: {
+    background: "transparent",
     color: "var(--primary)",
+    border: "1px solid var(--border-strong)",
+    padding: "12px",
+    borderRadius: "12px",
     fontSize: "14px",
     fontWeight: "600",
     cursor: "pointer",
-    textDecoration: "underline",
+  },
+  footer: {
+    marginTop: "24px",
+    textAlign: "center",
   },
   brandingText: {
     margin: "8px 0 0 0",
@@ -169,6 +235,12 @@ const styles: { [key: string]: React.CSSProperties } = {
   brandingLink: {
     color: "var(--primary)",
     textDecoration: "none",
+    fontWeight: "500",
+  },
+  madeInText: {
+    margin: "6px 0 0 0",
+    fontSize: "11px",
+    color: "var(--muted)",
     fontWeight: "500",
   },
 };
