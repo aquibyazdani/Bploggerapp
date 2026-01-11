@@ -1,23 +1,19 @@
 import React, { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
-import { Activity, Eye, EyeOff } from "lucide-react";
+import { Activity } from "lucide-react";
 
 export const LoginPage: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const { login } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLogin = async () => {
     setError("");
     setLoading(true);
 
     try {
-      await login(email, password);
+      await login();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
     } finally {
@@ -36,53 +32,21 @@ export const LoginPage: React.FC = () => {
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
+        <div style={styles.form}>
           {error && <div style={styles.error}>{error}</div>}
 
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              style={styles.input}
-              placeholder="Enter your email"
-              required
-            />
-          </div>
-
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>Password</label>
-            <div style={styles.passwordContainer}>
-              <input
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={styles.input}
-                placeholder="Enter your password"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                style={styles.eyeButton}
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
-            </div>
-          </div>
-
           <button
-            type="submit"
+            type="button"
             style={{
               ...styles.button,
               ...(loading ? styles.buttonDisabled : {}),
             }}
             disabled={loading}
+            onClick={handleLogin}
           >
-            {loading ? "Signing In..." : "Sign In"}
+            {loading ? "Redirecting..." : "Continue with Auth0"}
           </button>
-        </form>
+        </div>
 
         <div style={styles.footer}>
           <p style={styles.footerText}>
@@ -162,43 +126,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     borderRadius: "8px",
     fontSize: "14px",
     textAlign: "center",
-  },
-  inputGroup: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
-  },
-  label: {
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "var(--muted)",
-  },
-  input: {
-    padding: "12px 40px 12px 16px",
-    border: "1px solid var(--border-strong)",
-    borderRadius: "12px",
-    fontSize: "16px",
-    outline: "none",
-    transition: "border-color 0.2s",
-    width: "100%",
-    backgroundColor: "var(--surface-muted)",
-  },
-  passwordContainer: {
-    position: "relative",
-  },
-  eyeButton: {
-    position: "absolute",
-    right: "12px",
-    top: "50%",
-    transform: "translateY(-50%)",
-    background: "none",
-    border: "none",
-    color: "var(--muted)",
-    cursor: "pointer",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: "4px",
   },
   button: {
     background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%)",

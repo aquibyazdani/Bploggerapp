@@ -4,7 +4,7 @@ A modern, full-stack web application for tracking blood pressure readings with u
 
 ## Features
 
-- 🔐 User authentication (register/login)
+- 🔐 Auth0 authentication
 - 📊 Dashboard with BP statistics
 - 📝 Add, edit, delete BP readings
 - 📈 Trends and data visualization
@@ -25,7 +25,7 @@ A modern, full-stack web application for tracking blood pressure readings with u
 
 - Node.js with Express.js
 - MongoDB with Mongoose
-- JWT authentication
+- Auth0 JWT verification
 - bcrypt password hashing
 - Express Validator
 
@@ -66,8 +66,7 @@ A modern, full-stack web application for tracking blood pressure readings with u
 
    ```bash
    cd backend
-   # The .env file is already configured with MongoDB Atlas
-   # Update JWT_SECRET for production
+   # Set Auth0 and MongoDB variables before running
    ```
 
 4. **Start the Backend**
@@ -91,6 +90,9 @@ A modern, full-stack web application for tracking blood pressure readings with u
 
 ```env
 VITE_API_BASE_URL=http://localhost:5001/api
+VITE_AUTH0_DOMAIN=your-tenant.us.auth0.com
+VITE_AUTH0_CLIENT_ID=your_auth0_client_id
+VITE_AUTH0_AUDIENCE=https://bplogger-api
 ```
 
 ### Backend (backend/.env)
@@ -98,7 +100,9 @@ VITE_API_BASE_URL=http://localhost:5001/api
 ```env
 PORT=5001
 MONGODB_URI=mongodb+srv://your-connection-string
-JWT_SECRET=your-secure-jwt-secret
+AUTH0_DOMAIN=your-tenant.us.auth0.com
+AUTH0_AUDIENCE=https://bplogger-api
+ALLOWED_ORIGINS=http://localhost:3000
 NODE_ENV=development
 ```
 
@@ -106,9 +110,7 @@ NODE_ENV=development
 
 ### Authentication
 
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - User login
-- `GET /api/auth/profile` - Get user profile
+- `GET /api/auth/profile` - Get user profile (requires Auth0 JWT)
 
 ### Readings
 
