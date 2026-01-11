@@ -491,7 +491,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     position: "sticky",
     top: 0,
     zIndex: 40,
-    boxShadow: "0 10px 24px rgba(80, 98, 244, 0.2)",
+    // boxShadow: "0 10px 24px rgba(80, 98, 244, 0.2)",
     borderRadius: "0px 0px 18px 18px",
   },
   headerContent: {
