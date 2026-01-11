@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { DashboardPage } from "./components/DashboardPage";
 import { ReadingsPage } from "./components/ReadingsPage";
@@ -28,6 +28,8 @@ export interface Reading {
   timestamp: string;
 }
 
+const DEFAULT_THEME_COLOR = "#5b6cf4";
+
 function AppContent() {
   const { user, token, logout, loading } = useAuth();
   const [currentPage, setCurrentPage] = useState<
@@ -40,10 +42,10 @@ function AppContent() {
   const [showAddToHomescreenModal, setShowAddToHomescreenModal] =
     useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
-  const defaultThemeColor = "#5b6cf4";
-  const [themeColor, setThemeColor] = useState(defaultThemeColor);
+  const [themeColor, setThemeColor] = useState(DEFAULT_THEME_COLOR);
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
-  const applyThemeColor = (color: string) => {
+  const applyThemeColor = useCallback((color: string) => {
     const hex = color.trim();
     if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return;
 
@@ -76,33 +78,37 @@ function AppContent() {
     root.setProperty("--primary-strong", strong);
     root.setProperty("--primary-soft", soft);
     root.setProperty("--primary-rgb", `${rgb.r}, ${rgb.g}, ${rgb.b}`);
-  };
+  }, []);
 
   // Load readings from API
-  const loadReadings = async () => {
-    if (!token) return;
+  const loadReadings = useCallback(
+    async (withLoading = true) => {
+      if (!token) return;
 
-    setReadingsLoading(true);
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/readings`,
-        {
+      if (withLoading) {
+        setReadingsLoading(true);
+      }
+      try {
+        const response = await fetch(`${apiBaseUrl}/readings`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
-      );
+        });
 
-      if (response.ok) {
-        const data = await response.json();
-        setReadings(data);
+        if (response.ok) {
+          const data = await response.json();
+          setReadings(data);
+        }
+      } catch (error) {
+        console.error("Error loading readings:", error);
+      } finally {
+        if (withLoading) {
+          setReadingsLoading(false);
+        }
       }
-    } catch (error) {
-      console.error("Error loading readings:", error);
-    } finally {
-      setReadingsLoading(false);
-    }
-  };
+    },
+    [apiBaseUrl, token]
+  );
 
   useEffect(() => {
     if (user && token) {
@@ -120,7 +126,7 @@ function AppContent() {
 
       return () => clearTimeout(timer);
     }
-  }, [user, token]);
+  }, [loadReadings, token, user]);
 
   useEffect(() => {
     const storedColor = localStorage.getItem("themeColor");
@@ -128,15 +134,15 @@ function AppContent() {
       setThemeColor(storedColor);
       applyThemeColor(storedColor);
     } else {
-      applyThemeColor(defaultThemeColor);
+      applyThemeColor(DEFAULT_THEME_COLOR);
     }
-  }, []);
+  }, [applyThemeColor]);
 
   useEffect(() => {
     if (!/^#[0-9a-fA-F]{6}$/.test(themeColor)) return;
     applyThemeColor(themeColor);
     localStorage.setItem("themeColor", themeColor);
-  }, [themeColor]);
+  }, [applyThemeColor, themeColor]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -162,7 +168,14 @@ function AppContent() {
   }, []);
 
   // Handle PWA installation
-  const handleInstallApp = async () => {
+  const handleIOSInstall = useCallback(() => {
+    // On iOS, we can't programmatically install, but we can try to guide the user
+    // The modal will show iOS-specific instructions
+    // We could potentially try to trigger the share menu, but it's unreliable
+    console.log("iOS installation - showing instructions");
+  }, []);
+
+  const handleInstallApp = useCallback(async () => {
     if (!deferredPrompt) {
       // Fallback for iOS - try to guide user to share menu
       handleIOSInstall();
@@ -184,138 +197,134 @@ function AppContent() {
     } else {
       console.log("User dismissed the install prompt");
     }
-  };
+  }, [deferredPrompt, handleIOSInstall]);
 
-  // Handle iOS installation (fallback)
-  const handleIOSInstall = () => {
-    // On iOS, we can't programmatically install, but we can try to guide the user
-    // The modal will show iOS-specific instructions
-    // We could potentially try to trigger the share menu, but it's unreliable
-    console.log("iOS installation - showing instructions");
-  };
+  const handleAddReading = useCallback(
+    async (reading: Omit<Reading, "_id" | "timestamp">) => {
+      if (!token) return;
 
-  const handleAddReading = async (
-    reading: Omit<Reading, "_id" | "timestamp">
-  ) => {
-    if (!token) return;
-
-    setReadingsLoading(true);
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/readings`,
-        {
+      try {
+        setReadingsLoading(true);
+        const response = await fetch(`${apiBaseUrl}/readings`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(reading),
-        }
-      );
+        });
 
-      if (response.ok) {
-        await loadReadings();
+        if (!response.ok) {
+          throw new Error("Failed to add reading");
+        }
+
+        await loadReadings(false);
         setShowForm(false);
-      } else {
+      } catch (error) {
+        console.error("Error adding reading:", error);
+      } finally {
         setReadingsLoading(false);
       }
-    } catch (error) {
-      console.error("Error adding reading:", error);
-      setReadingsLoading(false);
-    }
-  };
+    },
+    [apiBaseUrl, loadReadings, token]
+  );
 
-  const handleEditReading = (reading: Reading) => {
+  const handleEditReading = useCallback((reading: Reading) => {
     setEditingReading(reading);
     setShowForm(true);
     setCurrentPage("readings");
-  };
+  }, []);
 
-  const handleUpdateReading = async (updatedReading: Reading) => {
-    if (!token) return;
+  const handleUpdateReading = useCallback(
+    async (updatedReading: Reading) => {
+      if (!token) return;
 
-    setReadingsLoading(true);
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/readings/${updatedReading._id}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            timestamp: updatedReading.timestamp,
-            systolic: updatedReading.systolic,
-            diastolic: updatedReading.diastolic,
-            pulse: updatedReading.pulse,
-            bodyPosition: updatedReading.bodyPosition,
-            note: updatedReading.note,
-          }),
+      try {
+        setReadingsLoading(true);
+        const response = await fetch(
+          `${apiBaseUrl}/readings/${updatedReading._id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              timestamp: updatedReading.timestamp,
+              systolic: updatedReading.systolic,
+              diastolic: updatedReading.diastolic,
+              pulse: updatedReading.pulse,
+              bodyPosition: updatedReading.bodyPosition,
+              note: updatedReading.note,
+            }),
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to update reading");
         }
-      );
 
-      if (response.ok) {
-        await loadReadings();
+        await loadReadings(false);
         setEditingReading(null);
         setShowForm(false);
-      } else {
+      } catch (error) {
+        console.error("Error updating reading:", error);
+      } finally {
         setReadingsLoading(false);
       }
-    } catch (error) {
-      console.error("Error updating reading:", error);
-      setReadingsLoading(false);
-    }
-  };
+    },
+    [apiBaseUrl, loadReadings, token]
+  );
 
-  const handleDeleteReading = async (id: string) => {
-    if (!token) return;
+  const handleDeleteReading = useCallback(
+    async (id: string) => {
+      if (!token) return;
 
-    setReadingsLoading(true);
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL}/readings/${id}`,
-        {
+      try {
+        setReadingsLoading(true);
+        const response = await fetch(`${apiBaseUrl}/readings/${id}`, {
           method: "DELETE",
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        }
-      );
+        });
 
-      if (response.ok) {
-        await loadReadings();
+        if (!response.ok) {
+          throw new Error("Failed to delete reading");
+        }
+
+        await loadReadings(false);
         if (editingReading?._id === id) {
           setEditingReading(null);
           setShowForm(false);
         }
-      } else {
+      } catch (error) {
+        console.error("Error deleting reading:", error);
+      } finally {
         setReadingsLoading(false);
       }
-    } catch (error) {
-      console.error("Error deleting reading:", error);
-      setReadingsLoading(false);
-    }
-  };
+    },
+    [apiBaseUrl, editingReading, loadReadings, token]
+  );
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = useCallback(() => {
     setEditingReading(null);
     setShowForm(false);
-  };
+  }, []);
 
-  const handleQuickAdd = () => {
+  const handleQuickAdd = useCallback(() => {
     setCurrentPage("readings");
     setEditingReading(null);
     setShowForm(true);
-  };
+  }, []);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     logout();
     setCurrentPage("dashboard");
     setReadings([]);
     // Clear hash on logout
     window.location.hash = "";
-  };
+  }, [logout]);
 
   if (loading) {
     return (
@@ -388,7 +397,7 @@ function AppContent() {
             onThemeColorChange={setThemeColor}
             onResetTheme={() => {
               localStorage.removeItem("themeColor");
-              setThemeColor(defaultThemeColor);
+              setThemeColor(DEFAULT_THEME_COLOR);
             }}
             email={user?.email}
           />
@@ -531,33 +540,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     position: "relative",
     color: "var(--text)",
   },
-  nav: {
-    display: "none",
-  },
-  navContainer: {
-    display: "none",
-  },
-  logo: {
-    display: "none",
-  },
-  logoIcon: {
-    display: "none",
-  },
-  logoText: {
-    display: "none",
-  },
-  navLinks: {
-    display: "none",
-  },
-  navLink: {
-    display: "none",
-  },
-  navLinkActive: {
-    display: "none",
-  },
-  navLinkIcon: {
-    display: "none",
-  },
   header: {
     background:
       "linear-gradient(135deg, var(--primary-strong) 0%, var(--primary) 100%)",
@@ -691,20 +673,6 @@ const styles: { [key: string]: React.CSSProperties } = {
   bottomNavIcon: {
     transition: "transform 0.2s",
   },
-  bottomNavLabel: {
-    fontSize: "9px",
-    fontWeight: "600",
-    letterSpacing: "0.015em",
-    textTransform: "uppercase",
-    color: "var(--muted)",
-  },
-  bottomNavLabelActive: {
-    fontSize: "9px",
-    fontWeight: "700",
-    letterSpacing: "0.02em",
-    textTransform: "uppercase",
-    color: "var(--primary)",
-  },
   brandingFooter: {
     position: "fixed",
     bottom: 0,
@@ -729,14 +697,5 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: "var(--primary)",
     textDecoration: "none",
     fontWeight: "500",
-  },
-  footer: {
-    display: "none",
-  },
-  footerText: {
-    display: "none",
-  },
-  footerIcon: {
-    display: "none",
   },
 };

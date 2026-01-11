@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { Auth0Provider, useAuth0 } from "@auth0/auth0-react";
 
 interface User {
@@ -37,19 +44,17 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
     logout,
     getAccessTokenSilently,
   } = useAuth0();
-  const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
-  useEffect(() => {
+  const user = useMemo<User | null>(() => {
     if (!isAuthenticated || !auth0User) {
-      setUser(null);
-      return;
+      return null;
     }
 
     const auth0UserId =
       auth0User.sub || (auth0User as { user_id?: string }).user_id || "";
 
-    setUser({
+    return {
       id: auth0UserId,
       name:
         auth0User.name ||
@@ -57,7 +62,7 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
         auth0User.email ||
         "User",
       email: auth0User.email || "",
-    });
+    };
   }, [auth0User, isAuthenticated]);
 
   useEffect(() => {
@@ -89,36 +94,38 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
     };
   }, [getAccessTokenSilently, isAuthenticated]);
 
-  const login = async () => {
+  const login = useCallback(async () => {
     await loginWithRedirect();
-  };
+  }, [loginWithRedirect]);
 
-  const register = async () => {
+  const register = useCallback(async () => {
     await loginWithRedirect({
       authorizationParams: {
         screen_hint: "signup",
       },
     });
-  };
+  }, [loginWithRedirect]);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     setToken(null);
-    setUser(null);
     logout({
       logoutParams: {
         returnTo: window.location.origin,
       },
     });
-  };
+  }, [logout]);
 
-  const value = {
-    user,
-    token,
-    login,
-    register,
-    logout: handleLogout,
-    loading: isLoading,
-  };
+  const value = useMemo(
+    () => ({
+      user,
+      token,
+      login,
+      register,
+      logout: handleLogout,
+      loading: isLoading,
+    }),
+    [handleLogout, isLoading, login, register, token, user]
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
