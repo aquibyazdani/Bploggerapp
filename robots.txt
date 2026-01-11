@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://bplogger.aquibyazdani.com/sitemap.xml
+Sitemap: https://bptracker.aquibyazdani.com/sitemap.xml
