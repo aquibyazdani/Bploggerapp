@@ -92,7 +92,7 @@ export const LoginPage: React.FC = () => {
               Aquib Yazdani
             </a>
           </p>
-          <p style={styles.madeInText}>Crafted in India with care.</p>
+          <p style={styles.madeInText}>🇮🇳 Crafted in India with care.</p>
         </div>
       </div>
     </div>
@@ -229,8 +229,9 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   brandingText: {
     margin: "8px 0 0 0",
-    fontSize: "12px",
+    fontSize: "13px",
     color: "var(--muted)",
+    fontWeight: "600",
   },
   brandingLink: {
     color: "var(--primary)",
@@ -238,8 +239,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: "500",
   },
   madeInText: {
-    margin: "6px 0 0 0",
-    fontSize: "11px",
+    margin: "10px 0 0 0",
+    fontSize: "12px",
     color: "var(--muted)",
     fontWeight: "500",
   },
