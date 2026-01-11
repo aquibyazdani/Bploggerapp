@@ -283,28 +283,26 @@ function AppContent() {
   const handleDeleteReading = async (id: string) => {
     if (!token) return;
 
-    if (confirm("Are you sure you want to delete this reading?")) {
-      try {
-        const response = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/readings/${id}`,
-          {
-            method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (response.ok) {
-          await loadReadings();
-          if (editingReading?._id === id) {
-            setEditingReading(null);
-            setShowForm(false);
-          }
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/readings/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
-      } catch (error) {
-        console.error("Error deleting reading:", error);
+      );
+
+      if (response.ok) {
+        await loadReadings();
+        if (editingReading?._id === id) {
+          setEditingReading(null);
+          setShowForm(false);
+        }
       }
+    } catch (error) {
+      console.error("Error deleting reading:", error);
     }
   };
 
