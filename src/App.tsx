@@ -128,7 +128,6 @@ function AppContent() {
     }
   }, [loadReadings, token, user]);
 
-
   useEffect(() => {
     const storedColor = localStorage.getItem("themeColor");
     if (storedColor) {
