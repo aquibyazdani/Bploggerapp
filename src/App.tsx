@@ -14,6 +14,7 @@ import {
   TrendingUp,
   FileBarChart,
   LogOut,
+  Plus,
 } from "lucide-react";
 
 export interface Reading {
@@ -253,7 +254,7 @@ function AppContent() {
     setShowForm(false);
   };
 
-  const handleDashboardAddClick = () => {
+  const handleQuickAdd = () => {
     setCurrentPage("readings");
     setEditingReading(null);
     setShowForm(true);
@@ -302,11 +303,7 @@ function AppContent() {
       {/* Main Content */}
       <main style={styles.main}>
         {currentPage === "dashboard" && (
-          <DashboardPage
-            readings={readings}
-            onAddClick={handleDashboardAddClick}
-            userName={user.name}
-          />
+          <DashboardPage readings={readings} userName={user.name} />
         )}
         {currentPage === "readings" && (
           <ReadingsPage
@@ -334,6 +331,7 @@ function AppContent() {
               ? styles.bottomNavButtonActive
               : {}),
           }}
+          aria-label="Dashboard"
         >
           <span
             style={
@@ -343,15 +341,6 @@ function AppContent() {
             }
           >
             <Home size={20} style={styles.bottomNavIcon} />
-          </span>
-          <span
-            style={
-              currentPage === "dashboard"
-                ? styles.bottomNavLabelActive
-                : styles.bottomNavLabel
-            }
-          >
-            Dashboard
           </span>
         </button>
         <button
@@ -364,6 +353,7 @@ function AppContent() {
             ...styles.bottomNavButton,
             ...(currentPage === "readings" ? styles.bottomNavButtonActive : {}),
           }}
+          aria-label="Readings"
         >
           <span
             style={
@@ -374,14 +364,14 @@ function AppContent() {
           >
             <List size={20} style={styles.bottomNavIcon} />
           </span>
-          <span
-            style={
-              currentPage === "readings"
-                ? styles.bottomNavLabelActive
-                : styles.bottomNavLabel
-            }
-          >
-            Readings
+        </button>
+        <button
+          onClick={handleQuickAdd}
+          style={styles.bottomNavCenterButton}
+          aria-label="Add reading"
+        >
+          <span style={styles.bottomNavCenterWrap}>
+            <Plus size={22} strokeWidth={2.6} />
           </span>
         </button>
         <button
@@ -390,6 +380,7 @@ function AppContent() {
             ...styles.bottomNavButton,
             ...(currentPage === "trends" ? styles.bottomNavButtonActive : {}),
           }}
+          aria-label="Trends"
         >
           <span
             style={
@@ -400,15 +391,6 @@ function AppContent() {
           >
             <TrendingUp size={20} style={styles.bottomNavIcon} />
           </span>
-          <span
-            style={
-              currentPage === "trends"
-                ? styles.bottomNavLabelActive
-                : styles.bottomNavLabel
-            }
-          >
-            Trends
-          </span>
         </button>
         <button
           onClick={() => setCurrentPage("summary")}
@@ -416,6 +398,7 @@ function AppContent() {
             ...styles.bottomNavButton,
             ...(currentPage === "summary" ? styles.bottomNavButtonActive : {}),
           }}
+          aria-label="Summary"
         >
           <span
             style={
@@ -425,15 +408,6 @@ function AppContent() {
             }
           >
             <FileBarChart size={20} style={styles.bottomNavIcon} />
-          </span>
-          <span
-            style={
-              currentPage === "summary"
-                ? styles.bottomNavLabelActive
-                : styles.bottomNavLabel
-            }
-          >
-            Summary
           </span>
         </button>
       </nav>
@@ -583,9 +557,34 @@ const styles: { [key: string]: React.CSSProperties } = {
     cursor: "pointer",
     transition: "all 0.2s",
     color: "var(--muted)",
+    justifyContent: "center",
   },
   bottomNavButtonActive: {
     transform: "translateY(-1px)",
+  },
+  bottomNavCenterButton: {
+    width: "64px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    background: "transparent",
+    border: "none",
+    padding: 0,
+    cursor: "pointer",
+    // transform: "translateY(-12px)",
+  },
+  bottomNavCenterWrap: {
+    width: "48px",
+    height: "48px",
+    borderRadius: "16px",
+    background:
+      "linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%)",
+    color: "#ffffff",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    boxShadow:
+      "0 10px 22px rgba(91, 108, 244, 0.35), 0 6px 14px rgba(15, 23, 42, 0.12)",
   },
   bottomNavIconWrap: {
     width: "32px",
@@ -596,13 +595,13 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: "center",
     justifyContent: "center",
     color: "#8a94a6",
-    boxShadow: "inset 0 0 0 1px var(--border)",
   },
   bottomNavIconWrapActive: {
     width: "32px",
     height: "32px",
     borderRadius: "10px",
-    background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%)",
+    background:
+      "linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",

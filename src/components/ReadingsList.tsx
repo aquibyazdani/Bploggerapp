@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Reading } from "../App";
 import {
   Pencil,
@@ -57,6 +57,23 @@ export function ReadingsList({
   onDelete,
   editingId,
 }: ReadingsListProps) {
+  const [pendingDelete, setPendingDelete] = useState<Reading | null>(null);
+
+  const handleDeleteRequest = (reading: Reading) => {
+    setPendingDelete(reading);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (pendingDelete) {
+      onDelete(pendingDelete._id);
+      setPendingDelete(null);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setPendingDelete(null);
+  };
+
   if (readings.length === 0) {
     return (
       <div style={styles.emptyCard}>
@@ -114,7 +131,7 @@ export function ReadingsList({
                     <Pencil size={14} />
                   </button>
                   <button
-                    onClick={() => onDelete(reading._id)}
+                    onClick={() => handleDeleteRequest(reading)}
                     style={styles.iconButtonDelete}
                     aria-label="Delete reading"
                     title="Delete"
@@ -174,6 +191,34 @@ export function ReadingsList({
           );
         })}
       </div>
+
+      {pendingDelete && (
+        <div style={styles.confirmOverlay} onClick={handleDeleteCancel}>
+          <div
+            style={styles.confirmCard}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={styles.confirmTitle}>Delete reading?</h3>
+            <p style={styles.confirmText}>
+              This will permanently remove the reading from your history.
+            </p>
+            <div style={styles.confirmActions}>
+              <button
+                style={styles.confirmCancel}
+                onClick={handleDeleteCancel}
+              >
+                Cancel
+              </button>
+              <button
+                style={styles.confirmDelete}
+                onClick={handleDeleteConfirm}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -371,5 +416,69 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: "14px",
     color: "var(--muted)",
     lineHeight: "1.5",
+  },
+  confirmOverlay: {
+    position: "fixed",
+    inset: 0,
+    backgroundColor: "rgba(15, 23, 42, 0.45)",
+    backdropFilter: "blur(6px)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 80,
+    padding: "20px",
+  },
+  confirmCard: {
+    width: "100%",
+    maxWidth: "320px",
+    backgroundColor: "var(--surface)",
+    borderRadius: "16px",
+    padding: "18px",
+    border: "1px solid var(--border)",
+    boxShadow: "var(--shadow-md)",
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+  },
+  confirmTitle: {
+    margin: 0,
+    fontSize: "16px",
+    fontWeight: "700",
+    color: "var(--text-strong)",
+    fontFamily: "var(--font-display)",
+  },
+  confirmText: {
+    margin: 0,
+    fontSize: "13px",
+    color: "var(--muted)",
+    lineHeight: "1.4",
+  },
+  confirmActions: {
+    display: "flex",
+    gap: "8px",
+    marginTop: "4px",
+  },
+  confirmCancel: {
+    flex: 1,
+    padding: "10px 12px",
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "var(--muted)",
+    backgroundColor: "transparent",
+    border: "1px solid var(--border-strong)",
+    borderRadius: "10px",
+    cursor: "pointer",
+  },
+  confirmDelete: {
+    flex: 1,
+    padding: "10px 12px",
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#ffffff",
+    backgroundColor: "#ef4444",
+    border: "none",
+    borderRadius: "10px",
+    cursor: "pointer",
+    boxShadow: "0 10px 18px rgba(239, 68, 68, 0.25)",
   },
 };

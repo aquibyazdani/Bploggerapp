@@ -8,18 +8,15 @@ import {
   Armchair,
   User,
   Bed,
-  Plus,
 } from "lucide-react";
 
 interface DashboardPageProps {
   readings: Reading[];
-  onAddClick: () => void;
   userName?: string;
 }
 
 export function DashboardPage({
   readings,
-  onAddClick,
   userName,
 }: DashboardPageProps) {
   // Calculate statistics
@@ -321,14 +318,6 @@ export function DashboardPage({
         </div>
       )}
 
-      {/* Floating Action Button */}
-      <button
-        onClick={onAddClick}
-        style={styles.fab}
-        aria-label="Add new reading"
-      >
-        <Plus size={28} strokeWidth={2.5} />
-      </button>
     </div>
   );
 }
@@ -506,23 +495,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: "var(--muted)",
   },
   fab: {
-    position: "fixed",
-    bottom: "90px",
-    right: "50%",
-    transform: "translateX(calc(215px - 20px))",
-    width: "50px",
-    height: "50px",
-    borderRadius: "50%",
-    background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%)",
-    color: "#ffffff",
-    border: "none",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    cursor: "pointer",
-    boxShadow: "0 10px 24px rgba(91, 108, 244, 0.35)",
-    zIndex: 45,
-    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-    opacity: 0.8,
+    display: "none",
   },
 };
