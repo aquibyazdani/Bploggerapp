@@ -157,6 +157,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       domain={domain}
       clientId={clientId}
       authorizationParams={authorizationParams}
+      cacheLocation="localstorage"
+      useRefreshTokens
     >
       <AuthProviderInner>{children}</AuthProviderInner>
     </Auth0Provider>
