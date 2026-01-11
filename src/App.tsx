@@ -335,8 +335,24 @@ function AppContent() {
               : {}),
           }}
         >
-          <Home size={24} style={styles.bottomNavIcon} />
-          <span style={styles.bottomNavLabel}>Dashboard</span>
+          <span
+            style={
+              currentPage === "dashboard"
+                ? styles.bottomNavIconWrapActive
+                : styles.bottomNavIconWrap
+            }
+          >
+            <Home size={20} style={styles.bottomNavIcon} />
+          </span>
+          <span
+            style={
+              currentPage === "dashboard"
+                ? styles.bottomNavLabelActive
+                : styles.bottomNavLabel
+            }
+          >
+            Dashboard
+          </span>
         </button>
         <button
           onClick={() => {
@@ -349,8 +365,24 @@ function AppContent() {
             ...(currentPage === "readings" ? styles.bottomNavButtonActive : {}),
           }}
         >
-          <List size={24} style={styles.bottomNavIcon} />
-          <span style={styles.bottomNavLabel}>Readings</span>
+          <span
+            style={
+              currentPage === "readings"
+                ? styles.bottomNavIconWrapActive
+                : styles.bottomNavIconWrap
+            }
+          >
+            <List size={20} style={styles.bottomNavIcon} />
+          </span>
+          <span
+            style={
+              currentPage === "readings"
+                ? styles.bottomNavLabelActive
+                : styles.bottomNavLabel
+            }
+          >
+            Readings
+          </span>
         </button>
         <button
           onClick={() => setCurrentPage("trends")}
@@ -359,8 +391,24 @@ function AppContent() {
             ...(currentPage === "trends" ? styles.bottomNavButtonActive : {}),
           }}
         >
-          <TrendingUp size={24} style={styles.bottomNavIcon} />
-          <span style={styles.bottomNavLabel}>Trends</span>
+          <span
+            style={
+              currentPage === "trends"
+                ? styles.bottomNavIconWrapActive
+                : styles.bottomNavIconWrap
+            }
+          >
+            <TrendingUp size={20} style={styles.bottomNavIcon} />
+          </span>
+          <span
+            style={
+              currentPage === "trends"
+                ? styles.bottomNavLabelActive
+                : styles.bottomNavLabel
+            }
+          >
+            Trends
+          </span>
         </button>
         <button
           onClick={() => setCurrentPage("summary")}
@@ -369,8 +417,24 @@ function AppContent() {
             ...(currentPage === "summary" ? styles.bottomNavButtonActive : {}),
           }}
         >
-          <FileBarChart size={24} style={styles.bottomNavIcon} />
-          <span style={styles.bottomNavLabel}>Summary</span>
+          <span
+            style={
+              currentPage === "summary"
+                ? styles.bottomNavIconWrapActive
+                : styles.bottomNavIconWrap
+            }
+          >
+            <FileBarChart size={20} style={styles.bottomNavIcon} />
+          </span>
+          <span
+            style={
+              currentPage === "summary"
+                ? styles.bottomNavLabelActive
+                : styles.bottomNavLabel
+            }
+          >
+            Summary
+          </span>
         </button>
       </nav>
 
@@ -494,14 +558,16 @@ const styles: { [key: string]: React.CSSProperties } = {
     transform: "translateX(-50%)",
     width: "100%",
     maxWidth: "430px",
-    backgroundColor: "#ffffff",
-    borderTop: "none",
+    backgroundColor: "rgba(255, 255, 255, 0.94)",
+    backdropFilter: "blur(12px)",
+    border: "1px solid rgba(15, 23, 42, 0.06)",
     display: "flex",
     justifyContent: "space-around",
-    padding: "8px 0 max(8px, env(safe-area-inset-bottom))",
+    padding: "8px 8px max(10px, env(safe-area-inset-bottom))",
     zIndex: 50,
-    boxShadow: "0 -4px 12px rgba(0, 0, 0, 0.06)",
-    borderRadius: "24px 24px 0 0",
+    boxShadow:
+      "0 -6px 20px rgba(15, 23, 42, 0.08), 0 -1px 0 rgba(255, 255, 255, 0.7) inset",
+    borderRadius: "20px 20px 16px 16px",
   },
   bottomNavButton: {
     flex: 1,
@@ -509,7 +575,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     flexDirection: "column",
     alignItems: "center",
     gap: "4px",
-    padding: "8px 12px",
+    padding: "4px 4px",
     backgroundColor: "transparent",
     border: "none",
     cursor: "pointer",
@@ -517,15 +583,46 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: "#a3a3a3",
   },
   bottomNavButtonActive: {
-    color: "#6B7CF5",
+    transform: "translateY(-1px)",
+  },
+  bottomNavIconWrap: {
+    width: "32px",
+    height: "32px",
+    borderRadius: "10px",
+    backgroundColor: "#f1f5f9",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#94a3b8",
+    boxShadow: "inset 0 0 0 1px rgba(148, 163, 184, 0.12)",
+  },
+  bottomNavIconWrapActive: {
+    width: "32px",
+    height: "32px",
+    borderRadius: "10px",
+    background: "linear-gradient(135deg, #6B7CF5 0%, #5B6CF4 100%)",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    color: "#ffffff",
+    boxShadow: "0 5px 12px rgba(91, 108, 244, 0.32)",
   },
   bottomNavIcon: {
     transition: "transform 0.2s",
   },
   bottomNavLabel: {
-    fontSize: "11px",
-    fontWeight: "500",
-    letterSpacing: "0.01em",
+    fontSize: "9px",
+    fontWeight: "600",
+    letterSpacing: "0.015em",
+    textTransform: "uppercase",
+    color: "#9aa0ab",
+  },
+  bottomNavLabelActive: {
+    fontSize: "9px",
+    fontWeight: "700",
+    letterSpacing: "0.02em",
+    textTransform: "uppercase",
+    color: "#5B6CF4",
   },
   brandingFooter: {
     position: "fixed",
