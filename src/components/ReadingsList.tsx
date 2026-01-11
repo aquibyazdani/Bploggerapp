@@ -9,6 +9,7 @@ import {
   Bed,
   BarChart2,
 } from "lucide-react";
+import { getBPCategory } from "../utils/bp";
 
 interface ReadingsListProps {
   readings: Reading[];
@@ -48,23 +49,6 @@ function getPositionIcon(position: string): React.ReactNode {
 
 function getPositionLabel(position: string): string {
   return position.charAt(0).toUpperCase() + position.slice(1);
-}
-
-function getBPCategory(
-  systolic: number,
-  diastolic: number
-): { label: string; color: string } {
-  if (systolic < 120 && diastolic < 80) {
-    return { label: "Normal", color: "#10b981" };
-  } else if (systolic < 130 && diastolic < 80) {
-    return { label: "Elevated", color: "#f59e0b" };
-  } else if (systolic < 140 || diastolic < 90) {
-    return { label: "High BP", color: "#ef4444" };
-  } else if (systolic < 180 || diastolic < 120) {
-    return { label: "High BP", color: "#dc2626" };
-  } else {
-    return { label: "Crisis", color: "#991b1b" };
-  }
 }
 
 export function ReadingsList({

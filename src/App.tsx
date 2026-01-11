@@ -1,13 +1,3 @@
-/**
- * BP Tracker - Professional Blood Pressure Tracking Application
- *
- * Multi-page app with:
- * - Dashboard: Overview of readings
- * - Readings: Data listing with add/edit/delete
- * - Trends: Visual charts and patterns
- * - Summary: Statistics and CSV export with date filtering
- */
-
 import React, { useState, useEffect } from "react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { DashboardPage } from "./components/DashboardPage";

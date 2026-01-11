@@ -10,6 +10,7 @@ import {
   User,
   Bed,
 } from "lucide-react";
+import { getBPCategory } from "../utils/bp";
 
 interface TrendsPageProps {
   readings: Reading[];
@@ -83,6 +84,10 @@ function getBodyPositionStats(readings: Reading[]): {
 export function TrendsPage({ readings }: TrendsPageProps) {
   const trends = calculateTrends(readings);
   const positionStats = getBodyPositionStats(readings);
+  const averageCategory =
+    readings.length > 0
+      ? getBPCategory(trends.averageSystolic, trends.averageDiastolic)
+      : null;
 
   if (readings.length === 0) {
     return (
@@ -147,6 +152,11 @@ export function TrendsPage({ readings }: TrendsPageProps) {
             <span style={styles.statValue}>
               {trends.averageSystolic}/{trends.averageDiastolic}
             </span>
+            {averageCategory && (
+              <span style={{ ...styles.statSubLabel, color: averageCategory.color }}>
+                {averageCategory.label}
+              </span>
+            )}
           </div>
         </div>
 
@@ -385,6 +395,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: "20px",
     fontWeight: "600",
     color: "#0a0a0a",
+  },
+  statSubLabel: {
+    fontSize: "11px",
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: "0.06em",
   },
   card: {
     backgroundColor: "#ffffff",

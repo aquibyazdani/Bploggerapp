@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Reading } from "../App";
+import { getBPCategory } from "../utils/bp";
 import {
   BarChart3,
   Download,
@@ -157,67 +158,6 @@ function calculateStats(
         : 0,
     count: recentReadings.length,
   };
-}
-
-function getBPCategory(
-  systolic: number,
-  diastolic: number
-): { label: string; color: string; message: string } {
-  // Check for Crisis first (highest priority)
-  if (systolic >= 180 || diastolic >= 120) {
-    return {
-      label: "Hypertensive Crisis",
-      color: "#991b1b",
-      message: "This is a medical emergency. Seek immediate medical care.",
-    };
-  }
-  // Check for Stage 2
-  else if (systolic >= 140 || diastolic >= 90) {
-    return {
-      label: "High Blood Pressure (Stage 2)",
-      color: "#dc2626",
-      message: "You have stage 2 hypertension. Seek medical attention.",
-    };
-  }
-  // Check for Stage 1
-  else if (
-    (systolic >= 130 && systolic <= 139) ||
-    (diastolic >= 82 && diastolic <= 89)
-  ) {
-    return {
-      label: "High Blood Pressure (Stage 1)",
-      color: "#ef4444",
-      message:
-        "You have stage 1 hypertension. Consult with your healthcare provider.",
-    };
-  }
-  // Check for Elevated
-  else if (systolic >= 120 && systolic <= 129 && diastolic < 81) {
-    return {
-      label: "Elevated",
-      color: "#f59e0b",
-      message:
-        "Your blood pressure is elevated. Consider lifestyle modifications.",
-    };
-  }
-  // Normal
-  else if (systolic < 120 && diastolic < 81) {
-    return {
-      label: "Normal",
-      color: "#10b981",
-      message:
-        "Your blood pressure is in the normal range. Keep up the good work!",
-    };
-  }
-  // Fallback (shouldn't reach here, but just in case)
-  else {
-    return {
-      label: "Normal",
-      color: "#10b981",
-      message:
-        "Your blood pressure is in the normal range. Keep up the good work!",
-    };
-  }
 }
 
 export function SummaryPage({ readings }: SummaryPageProps) {
@@ -423,16 +363,28 @@ export function SummaryPage({ readings }: SummaryPageProps) {
               }}
             >
               <Lightbulb size={12} color={category.color} />
-              <p
-                style={{
-                  ...styles.categoryMessage,
-                  color: category.color,
-                  fontSize: "11px",
-                  margin: 0,
-                }}
-              >
-                {category.message}
-              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                <span
+                  style={{
+                    ...styles.categoryLabel,
+                    color: category.color,
+                    fontSize: "11px",
+                    margin: 0,
+                  }}
+                >
+                  {category.label}
+                </span>
+                <p
+                  style={{
+                    ...styles.categoryMessage,
+                    color: category.color,
+                    fontSize: "11px",
+                    margin: 0,
+                  }}
+                >
+                  {category.message}
+                </p>
+              </div>
             </div>
 
             {/* Note if exists */}
