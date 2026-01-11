@@ -573,6 +573,7 @@ input:focus, select:focus, textarea:focus {
   --primary: #5b6cf4;
   --primary-strong: #4555f3;
   --primary-soft: #eef2ff;
+  --primary-rgb: 91, 108, 244;
   --shadow-sm: 0 8px 20px rgba(15, 23, 42, 0.08);
   --shadow-md: 0 14px 28px rgba(15, 23, 42, 0.12);
   --radius-lg: 22px;

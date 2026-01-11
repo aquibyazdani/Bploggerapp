@@ -4,6 +4,7 @@ import { DashboardPage } from "./components/DashboardPage";
 import { ReadingsPage } from "./components/ReadingsPage";
 import { TrendsPage } from "./components/TrendsPage";
 import { SummaryPage } from "./components/SummaryPage";
+import { SettingsPage } from "./components/SettingsPage";
 import { LoginPage } from "./components/LoginPage";
 import { SignupPage } from "./components/SignupPage";
 import { AddToHomescreenModal } from "./components/AddToHomescreenModal";
@@ -15,6 +16,7 @@ import {
   FileBarChart,
   LogOut,
   Plus,
+  Settings,
 } from "lucide-react";
 
 export interface Reading {
@@ -30,7 +32,7 @@ export interface Reading {
 function AppContent() {
   const { user, token, logout, loading } = useAuth();
   const [currentPage, setCurrentPage] = useState<
-    "dashboard" | "readings" | "trends" | "summary"
+    "dashboard" | "readings" | "trends" | "summary" | "settings"
   >("dashboard");
   const [readings, setReadings] = useState<Reading[]>([]);
   const [editingReading, setEditingReading] = useState<Reading | null>(null);
@@ -39,6 +41,43 @@ function AppContent() {
   const [showAddToHomescreenModal, setShowAddToHomescreenModal] =
     useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const defaultThemeColor = "#5b6cf4";
+  const [themeColor, setThemeColor] = useState(defaultThemeColor);
+
+  const applyThemeColor = (color: string) => {
+    const hex = color.trim();
+    if (!/^#[0-9a-fA-F]{6}$/.test(hex)) return;
+
+    const toRgb = (value: string) => {
+      const num = parseInt(value.slice(1), 16);
+      return {
+        r: (num >> 16) & 255,
+        g: (num >> 8) & 255,
+        b: num & 255,
+      };
+    };
+
+    const mix = (c1: string, c2: string, weight: number) => {
+      const a = toRgb(c1);
+      const b = toRgb(c2);
+      const clamp = (val: number) => Math.min(255, Math.max(0, val));
+      const toHex = (val: number) => clamp(val).toString(16).padStart(2, "0");
+      const r = Math.round(a.r * (1 - weight) + b.r * weight);
+      const g = Math.round(a.g * (1 - weight) + b.g * weight);
+      const bVal = Math.round(a.b * (1 - weight) + b.b * weight);
+      return `#${toHex(r)}${toHex(g)}${toHex(bVal)}`;
+    };
+
+    const strong = mix(hex, "#000000", 0.18);
+    const soft = mix(hex, "#ffffff", 0.88);
+    const rgb = toRgb(hex);
+
+    const root = document.documentElement.style;
+    root.setProperty("--primary", hex);
+    root.setProperty("--primary-strong", strong);
+    root.setProperty("--primary-soft", soft);
+    root.setProperty("--primary-rgb", `${rgb.r}, ${rgb.g}, ${rgb.b}`);
+  };
 
   // Load readings from API
   const loadReadings = async () => {
@@ -80,6 +119,22 @@ function AppContent() {
       return () => clearTimeout(timer);
     }
   }, [user, token]);
+
+  useEffect(() => {
+    const storedColor = localStorage.getItem("themeColor");
+    if (storedColor) {
+      setThemeColor(storedColor);
+      applyThemeColor(storedColor);
+    } else {
+      applyThemeColor(defaultThemeColor);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!/^#[0-9a-fA-F]{6}$/.test(themeColor)) return;
+    applyThemeColor(themeColor);
+    localStorage.setItem("themeColor", themeColor);
+  }, [themeColor]);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -298,9 +353,22 @@ function AppContent() {
         <div style={styles.headerContent}>
           <Activity size={24} style={styles.headerIcon} />
           <h1 style={styles.headerTitle}>BP Tracker</h1>
-          <button onClick={handleLogout} style={styles.logoutButton}>
-            <LogOut size={20} />
-          </button>
+          <div style={styles.headerActions}>
+            <button
+              onClick={() => setCurrentPage("settings")}
+              style={styles.headerActionButton}
+              aria-label="Settings"
+            >
+              <Settings size={20} />
+            </button>
+            <button
+              onClick={handleLogout}
+              style={styles.headerActionButton}
+              aria-label="Log out"
+            >
+              <LogOut size={20} />
+            </button>
+          </div>
         </div>
       </header>
 
@@ -323,6 +391,16 @@ function AppContent() {
         )}
         {currentPage === "trends" && <TrendsPage readings={readings} />}
         {currentPage === "summary" && <SummaryPage readings={readings} />}
+        {currentPage === "settings" && (
+          <SettingsPage
+            themeColor={themeColor}
+            onThemeColorChange={setThemeColor}
+            onResetTheme={() => {
+              localStorage.removeItem("themeColor");
+              setThemeColor(defaultThemeColor);
+            }}
+          />
+        )}
       </main>
 
       {/* Bottom Navigation */}
@@ -489,13 +567,14 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: "none",
   },
   header: {
-    background: "linear-gradient(135deg, #5062f4 0%, #6d79ff 100%)",
+    background:
+      "linear-gradient(135deg, var(--primary-strong) 0%, var(--primary) 100%)",
     padding: "18px 20px 14px 20px",
     borderBottom: "none",
     position: "sticky",
     top: 0,
     zIndex: 40,
-    // boxShadow: "0 10px 24px rgba(80, 98, 244, 0.2)",
+    boxShadow: "0 10px 24px rgba(var(--primary-rgb), 0.22)",
     borderRadius: "0px 0px 18px 18px",
   },
   headerContent: {
@@ -515,13 +594,18 @@ const styles: { [key: string]: React.CSSProperties } = {
     letterSpacing: "-0.01em",
     fontFamily: "var(--font-display)",
   },
-  logoutButton: {
-    background: "none",
-    border: "none",
+  headerActions: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+  },
+  headerActionButton: {
+    background: "rgba(255, 255, 255, 0.2)",
+    border: "1px solid rgba(255, 255, 255, 0.25)",
     color: "#ffffff",
     cursor: "pointer",
-    padding: "4px",
-    borderRadius: "4px",
+    padding: "6px",
+    borderRadius: "10px",
     transition: "background-color 0.2s",
   },
   main: {

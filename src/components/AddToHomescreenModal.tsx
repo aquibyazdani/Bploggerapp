@@ -51,7 +51,7 @@ export function AddToHomescreenModal({
 
         <div style={styles.content}>
           <div style={styles.icon}>
-            <Smartphone size={48} color="#6B7CF5" />
+            <Smartphone size={48} color="var(--primary)" />
           </div>
 
           <h2 style={styles.title}>Add to Homescreen</h2>
