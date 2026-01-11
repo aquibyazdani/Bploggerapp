@@ -352,13 +352,14 @@ const styles: { [key: string]: React.CSSProperties } = {
     margin: "0 0 4px 0",
     fontSize: "22px",
     fontWeight: "600",
-    color: "#0a0a0a",
+    color: "var(--text-strong)",
+    fontFamily: "var(--font-display)",
     letterSpacing: "-0.02em",
   },
   subtitle: {
     margin: 0,
     fontSize: "14px",
-    color: "#737373",
+    color: "var(--muted)",
   },
   statsGrid: {
     display: "grid",
@@ -366,15 +367,15 @@ const styles: { [key: string]: React.CSSProperties } = {
     gap: "12px",
   },
   statCard: {
-    backgroundColor: "#ffffff",
-    borderRadius: "20px",
-    border: "1px solid #f0f0f0",
+    backgroundColor: "var(--surface)",
+    borderRadius: "var(--radius-lg)",
+    border: "1px solid var(--border)",
     padding: "20px",
     display: "flex",
     alignItems: "center",
     gap: "16px",
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)",
-    background: "linear-gradient(135deg, #ffffff 0%, #fafafa 100%)",
+    boxShadow: "var(--shadow-sm)",
+    background: "linear-gradient(135deg, #ffffff 0%, #f9fafc 100%)",
     position: "relative",
     overflow: "hidden",
   },
@@ -389,12 +390,12 @@ const styles: { [key: string]: React.CSSProperties } = {
   statLabel: {
     fontSize: "12px",
     fontWeight: "500",
-    color: "#a3a3a3",
+    color: "var(--muted)",
   },
   statValue: {
     fontSize: "20px",
     fontWeight: "600",
-    color: "#0a0a0a",
+    color: "var(--text-strong)",
   },
   statSubLabel: {
     fontSize: "11px",
@@ -403,12 +404,12 @@ const styles: { [key: string]: React.CSSProperties } = {
     letterSpacing: "0.06em",
   },
   card: {
-    backgroundColor: "#ffffff",
-    borderRadius: "20px",
-    border: "1px solid #f0f0f0",
+    backgroundColor: "var(--surface)",
+    borderRadius: "var(--radius-lg)",
+    border: "1px solid var(--border)",
     overflow: "hidden",
-    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06)",
-    background: "linear-gradient(135deg, #ffffff 0%, #fafafa 100%)",
+    boxShadow: "var(--shadow-sm)",
+    background: "linear-gradient(135deg, #ffffff 0%, #f9fafc 100%)",
     position: "relative",
   },
   cardHeader: {
@@ -420,7 +421,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     margin: 0,
     fontSize: "17px",
     fontWeight: "600",
-    color: "#0a0a0a",
+    color: "var(--text-strong)",
     letterSpacing: "-0.01em",
   },
   positionStats: {
@@ -446,12 +447,12 @@ const styles: { [key: string]: React.CSSProperties } = {
   positionLabel: {
     fontSize: "13px",
     fontWeight: "600",
-    color: "#0a0a0a",
+    color: "var(--text-strong)",
   },
   positionBar: {
     width: "100%",
     height: "6px",
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "var(--surface-muted)",
     borderRadius: "3px",
     overflow: "hidden",
   },
@@ -461,7 +462,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   positionCount: {
     fontSize: "12px",
-    color: "#a3a3a3",
+    color: "var(--muted)",
   },
   emptyState: {
     padding: "60px 24px",
@@ -476,11 +477,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     margin: "0 0 8px 0",
     fontSize: "16px",
     fontWeight: "600",
-    color: "#0a0a0a",
+    color: "var(--text-strong)",
   },
   emptyText: {
     margin: 0,
     fontSize: "14px",
-    color: "#a3a3a3",
+    color: "var(--muted)",
   },
 };
