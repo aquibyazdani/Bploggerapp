@@ -4,12 +4,14 @@ interface SettingsPageProps {
   themeColor: string;
   onThemeColorChange: (color: string) => void;
   onResetTheme: () => void;
+  email?: string;
 }
 
 export function SettingsPage({
   themeColor,
   onThemeColorChange,
   onResetTheme,
+  email,
 }: SettingsPageProps) {
   return (
     <div style={styles.container}>
@@ -18,6 +20,18 @@ export function SettingsPage({
         <p style={styles.subtitle}>
           Personalize the app with your preferred theme color.
         </p>
+      </div>
+
+      <div style={styles.card}>
+        <div style={styles.cardHeaderColumn}>
+          <h2 style={styles.cardTitle}>Account</h2>
+          <p style={styles.cardDescription}>
+            Your signed-in email address.
+          </p>
+        </div>
+        <div style={styles.emailRow}>
+          <span style={styles.emailValue}>{email || "Not available"}</span>
+        </div>
       </div>
 
       <div style={styles.card}>
@@ -107,6 +121,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: "center",
     justifyContent: "space-between",
     gap: "16px",
+  },
+  cardHeaderColumn: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
   },
   cardTitle: {
     margin: 0,
@@ -198,5 +217,17 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: "13px",
     fontWeight: "600",
     cursor: "pointer",
+  },
+  emailRow: {
+    backgroundColor: "var(--surface-muted)",
+    borderRadius: "12px",
+    border: "1px solid var(--border-strong)",
+    padding: "12px 14px",
+  },
+  emailValue: {
+    fontSize: "14px",
+    fontWeight: "600",
+    color: "var(--text-strong)",
+    wordBreak: "break-word",
   },
 };

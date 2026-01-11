@@ -397,6 +397,7 @@ function AppContent() {
               localStorage.removeItem("themeColor");
               setThemeColor(defaultThemeColor);
             }}
+            email={user?.email}
           />
         )}
       </main>

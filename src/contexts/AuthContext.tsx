@@ -102,6 +102,8 @@ const AuthProviderInner: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const handleLogout = () => {
+    setToken(null);
+    setUser(null);
     logout({
       logoutParams: {
         returnTo: window.location.origin,
