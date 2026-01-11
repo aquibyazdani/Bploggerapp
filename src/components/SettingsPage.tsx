@@ -25,9 +25,7 @@ export function SettingsPage({
       <div style={styles.card}>
         <div style={styles.cardHeaderColumn}>
           <h2 style={styles.cardTitle}>Account</h2>
-          <p style={styles.cardDescription}>
-            Your signed-in email address.
-          </p>
+          <p style={styles.cardDescription}>Your signed-in email address.</p>
         </div>
         <div style={styles.emailRow}>
           <span style={styles.emailValue}>{email || "Not available"}</span>
@@ -191,7 +189,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     height: "10px",
     flex: 1,
     borderRadius: "999px",
-    background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%)",
+    background:
+      "linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%)",
   },
   previewPillSecondary: {
     height: "10px",
