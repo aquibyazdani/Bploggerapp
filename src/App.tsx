@@ -34,6 +34,7 @@ function AppContent() {
     "dashboard" | "readings" | "trends" | "summary" | "settings"
   >("dashboard");
   const [readings, setReadings] = useState<Reading[]>([]);
+  const [readingsLoading, setReadingsLoading] = useState(false);
   const [editingReading, setEditingReading] = useState<Reading | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [showAddToHomescreenModal, setShowAddToHomescreenModal] =
@@ -81,6 +82,7 @@ function AppContent() {
   const loadReadings = async () => {
     if (!token) return;
 
+    setReadingsLoading(true);
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/readings`,
@@ -97,6 +99,8 @@ function AppContent() {
       }
     } catch (error) {
       console.error("Error loading readings:", error);
+    } finally {
+      setReadingsLoading(false);
     }
   };
 
@@ -196,6 +200,7 @@ function AppContent() {
   ) => {
     if (!token) return;
 
+    setReadingsLoading(true);
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/readings`,
@@ -212,9 +217,12 @@ function AppContent() {
       if (response.ok) {
         await loadReadings();
         setShowForm(false);
+      } else {
+        setReadingsLoading(false);
       }
     } catch (error) {
       console.error("Error adding reading:", error);
+      setReadingsLoading(false);
     }
   };
 
@@ -227,6 +235,7 @@ function AppContent() {
   const handleUpdateReading = async (updatedReading: Reading) => {
     if (!token) return;
 
+    setReadingsLoading(true);
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/readings/${updatedReading._id}`,
@@ -251,15 +260,19 @@ function AppContent() {
         await loadReadings();
         setEditingReading(null);
         setShowForm(false);
+      } else {
+        setReadingsLoading(false);
       }
     } catch (error) {
       console.error("Error updating reading:", error);
+      setReadingsLoading(false);
     }
   };
 
   const handleDeleteReading = async (id: string) => {
     if (!token) return;
 
+    setReadingsLoading(true);
     try {
       const response = await fetch(
         `${import.meta.env.VITE_API_BASE_URL}/readings/${id}`,
@@ -277,9 +290,12 @@ function AppContent() {
           setEditingReading(null);
           setShowForm(false);
         }
+      } else {
+        setReadingsLoading(false);
       }
     } catch (error) {
       console.error("Error deleting reading:", error);
+      setReadingsLoading(false);
     }
   };
 
@@ -362,6 +378,7 @@ function AppContent() {
             onCancelEdit={handleCancelEdit}
             editingReading={editingReading}
             showFormInitial={showForm}
+            loading={readingsLoading}
           />
         )}
         {currentPage === "trends" && <TrendsPage readings={readings} />}
