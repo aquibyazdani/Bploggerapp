@@ -81,6 +81,10 @@ function AppContent() {
     }
   }, [user, token]);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentPage]);
+
   // Check hash for auth page
   useEffect(() => {
     const handleHashChange = () => {
