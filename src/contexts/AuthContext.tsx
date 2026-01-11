@@ -140,8 +140,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const authorizationParams: {
     redirect_uri: string;
     audience?: string;
+    scope?: string;
   } = {
     redirect_uri: window.location.origin,
+    scope: "openid profile email",
   };
 
   if (audience) {
