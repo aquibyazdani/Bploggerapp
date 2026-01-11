@@ -31,7 +31,7 @@ export interface Reading {
 const DEFAULT_THEME_COLOR = "#5b6cf4";
 
 function AppContent() {
-  const { user, token, logout, loading } = useAuth();
+  const { user, token, logout, loading, isAuthenticated } = useAuth();
   const [currentPage, setCurrentPage] = useState<
     "dashboard" | "readings" | "trends" | "summary" | "settings"
   >("dashboard");
@@ -43,7 +43,6 @@ function AppContent() {
     useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [themeColor, setThemeColor] = useState(DEFAULT_THEME_COLOR);
-  const [showLogin, setShowLogin] = useState(false);
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 
   const applyThemeColor = useCallback((color: string) => {
@@ -129,18 +128,6 @@ function AppContent() {
     }
   }, [loadReadings, token, user]);
 
-  useEffect(() => {
-    if (loading || user) {
-      setShowLogin(false);
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setShowLogin(true);
-    }, 600);
-
-    return () => clearTimeout(timer);
-  }, [loading, user]);
 
   useEffect(() => {
     const storedColor = localStorage.getItem("themeColor");
@@ -355,21 +342,7 @@ function AppContent() {
     );
   }
 
-  if (!user) {
-    if (!showLogin) {
-      return (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100vh",
-          }}
-        >
-          <Activity size={28} style={{ color: themeColor }} />
-        </div>
-      );
-    }
+  if (!isAuthenticated) {
     return <LoginPage />;
   }
 
