@@ -142,7 +142,6 @@ function AppContent() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentPage]);
 
-
   // Listen for PWA install prompt
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -624,7 +623,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     zIndex: 50,
     boxShadow:
       "0 -10px 24px rgba(15, 23, 42, 0.08), 0 -1px 0 rgba(255, 255, 255, 0.7) inset",
-    borderRadius: "20px 20px 16px 16px",
+    borderRadius: "20px 20px 0px 0px",
   },
   bottomNavButton: {
     flex: 1,
