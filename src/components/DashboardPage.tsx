@@ -15,10 +15,7 @@ interface DashboardPageProps {
   userName?: string;
 }
 
-export function DashboardPage({
-  readings,
-  userName,
-}: DashboardPageProps) {
+export function DashboardPage({ readings, userName }: DashboardPageProps) {
   // Calculate statistics
   const stats = React.useMemo(() => {
     if (readings.length === 0) {
@@ -312,12 +309,11 @@ export function DashboardPage({
             Start tracking your blood pressure by adding your first reading.
             <br />
             <small style={styles.storageNote}>
-              Your data is stored locally in your browser and won't be shared.
+              Your data is stored in cloud will be safe with us.
             </small>
           </p>
         </div>
       )}
-
     </div>
   );
 }
