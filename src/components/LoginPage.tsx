@@ -92,7 +92,7 @@ export const LoginPage: React.FC = () => {
               Aquib Yazdani
             </a>
           </p>
-          <p style={styles.madeInText}>🇮🇳 Crafted in India with care.</p>
+          <p style={styles.madeInText}> Crafted in Pune, India with ❤️</p>
         </div>
       </div>
     </div>
@@ -198,7 +198,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     textAlign: "center",
   },
   button: {
-    background: "linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%)",
+    background:
+      "linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%)",
     color: "#ffffff",
     border: "none",
     padding: "14px",

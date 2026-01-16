@@ -403,7 +403,9 @@ function AppContent() {
           />
         )}
         {currentPage === "trends" && <TrendsPage readings={readings} />}
-        {currentPage === "summary" && <SummaryPage readings={readings} />}
+        {currentPage === "summary" && (
+          <SummaryPage readings={readings} userName={user?.name} />
+        )}
         {currentPage === "settings" && (
           <SettingsPage
             themeColor={themeColor}

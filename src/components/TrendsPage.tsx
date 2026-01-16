@@ -10,6 +10,16 @@ import {
   User,
   Bed,
 } from "lucide-react";
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend,
+} from "recharts";
 import { getBPCategory } from "../utils/bp";
 
 interface TrendsPageProps {
@@ -81,6 +91,47 @@ function getBodyPositionStats(readings: Reading[]): {
   };
 }
 
+function getRollingAverage(values: number[], index: number, windowSize: number) {
+  const start = Math.max(0, index - windowSize + 1);
+  const slice = values.slice(start, index + 1);
+  const total = slice.reduce((sum, val) => sum + val, 0);
+  return Math.round(total / slice.length);
+}
+
+const CustomTooltip = ({
+  active,
+  payload,
+  label,
+}: {
+  active?: boolean;
+  payload?: { dataKey: string; value: number; stroke: string; name?: string }[];
+  label?: string;
+}) => {
+  if (!active || !payload || payload.length === 0) return null;
+
+  return (
+    <div style={styles.tooltip}>
+      <span style={styles.tooltipTitle}>{label}</span>
+      <div style={styles.tooltipRows}>
+        {payload.map((entry) => (
+          <div key={entry.dataKey} style={styles.tooltipRow}>
+            <span
+              style={{
+                ...styles.tooltipDot,
+                backgroundColor: entry.stroke,
+              }}
+            />
+            <span style={styles.tooltipLabel}>
+              {entry.name || entry.dataKey}
+            </span>
+            <span style={styles.tooltipValue}>{entry.value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export function TrendsPage({ readings }: TrendsPageProps) {
   const trends = calculateTrends(readings);
   const positionStats = getBodyPositionStats(readings);
@@ -88,6 +139,18 @@ export function TrendsPage({ readings }: TrendsPageProps) {
     readings.length > 0
       ? getBPCategory(trends.averageSystolic, trends.averageDiastolic)
       : null;
+  const sortedReadings = [...readings].sort(
+    (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+  );
+  const systolicSeries = sortedReadings.map((reading) => reading.systolic);
+  const diastolicSeries = sortedReadings.map((reading) => reading.diastolic);
+  const chartData = sortedReadings.map((reading, index) => ({
+    date: formatDate(reading.timestamp),
+    systolic: reading.systolic,
+    diastolic: reading.diastolic,
+    systolicAvg: getRollingAverage(systolicSeries, index, 7),
+    diastolicAvg: getRollingAverage(diastolicSeries, index, 7),
+  }));
 
   if (readings.length === 0) {
     return (
@@ -248,6 +311,72 @@ export function TrendsPage({ readings }: TrendsPageProps) {
               {trends.averagePulse > 0 ? `${trends.averagePulse} bpm` : "N/A"}
             </span>
           </div>
+        </div>
+      </div>
+
+      <div style={styles.card}>
+        <div style={styles.cardHeader}>
+          <h2 style={styles.cardTitle}>BP Trends</h2>
+        </div>
+        <div style={styles.chartContainer}>
+          <ResponsiveContainer width="100%" height={170}>
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis
+                dataKey="date"
+                tick={{ fontSize: 10, fill: "var(--muted)" }}
+                tickLine={false}
+                axisLine={{ stroke: "#e2e8f0" }}
+                padding={{ left: 0, right: 0 }}
+              />
+              <YAxis
+                tick={{ fontSize: 10, fill: "var(--muted)" }}
+                domain={["auto", "auto"]}
+                tickLine={false}
+                axisLine={{ stroke: "#e2e8f0" }}
+                width={32}
+              />
+              <Tooltip content={<CustomTooltip />} />
+              <Legend
+                iconType="circle"
+                wrapperStyle={{ fontSize: 11, color: "var(--muted)" }}
+              />
+              <Line
+                type="monotone"
+                dataKey="systolic"
+                stroke="var(--primary)"
+                strokeWidth={2}
+                dot={false}
+                name="Systolic"
+              />
+              <Line
+                type="monotone"
+                dataKey="diastolic"
+                stroke="#38bdf8"
+                strokeWidth={2}
+                dot={false}
+                name="Diastolic"
+              />
+              <Line
+                type="monotone"
+                dataKey="systolicAvg"
+                stroke="var(--primary-strong)"
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                dot={false}
+                name="Systolic 7-read avg"
+              />
+              <Line
+                type="monotone"
+                dataKey="diastolicAvg"
+                stroke="#0ea5e9"
+                strokeWidth={2}
+                strokeDasharray="5 5"
+                dot={false}
+                name="Diastolic 7-read avg"
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
@@ -423,6 +552,47 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: "600",
     color: "var(--text-strong)",
     letterSpacing: "-0.01em",
+  },
+  chartContainer: {
+    padding: "0 16px 12px 16px",
+  },
+  tooltip: {
+    backgroundColor: "var(--surface)",
+    border: "1px solid var(--border)",
+    borderRadius: "12px",
+    padding: "10px 12px",
+    boxShadow: "var(--shadow-sm)",
+    color: "var(--text-strong)",
+    fontSize: "12px",
+  },
+  tooltipTitle: {
+    display: "block",
+    fontWeight: "600",
+    color: "var(--text-strong)",
+    marginBottom: "6px",
+  },
+  tooltipRows: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+  },
+  tooltipRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+  },
+  tooltipDot: {
+    width: "8px",
+    height: "8px",
+    borderRadius: "999px",
+  },
+  tooltipLabel: {
+    flex: 1,
+    color: "var(--muted)",
+  },
+  tooltipValue: {
+    fontWeight: "600",
+    color: "var(--text-strong)",
   },
   positionStats: {
     padding: "20px",

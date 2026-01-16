@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { jsPDF } from "jspdf";
 import { Reading } from "../App";
 import { getBPCategory, getBPBreakdown } from "../utils/bp";
 import {
@@ -15,6 +16,7 @@ import {
 
 interface SummaryPageProps {
   readings: Reading[];
+  userName?: string;
 }
 
 function formatDate(isoString: string): string {
@@ -28,6 +30,16 @@ function formatTime(isoString: string): string {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
+  });
+}
+
+function formatTimeIST(isoString: string): string {
+  const date = new Date(isoString);
+  return date.toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+    timeZone: "Asia/Kolkata",
   });
 }
 
@@ -48,21 +60,12 @@ function formatDisplayTime(isoString: string): string {
   });
 }
 
-function escapeCSV(value: string | number | undefined): string {
-  if (value === undefined || value === null || value === "") return "";
-  const str = String(value);
-  if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-    return `"${str.replace(/"/g, '""')}"`;
-  }
-  return str;
-}
-
-function downloadCSV(
+function downloadPDF(
   readings: Reading[],
   startDate?: string,
-  endDate?: string
+  endDate?: string,
+  patientName?: string
 ) {
-  // Filter readings by date range if provided
   let filteredReadings = readings;
   if (startDate || endDate) {
     filteredReadings = readings.filter((r) => {
@@ -73,54 +76,262 @@ function downloadCSV(
     });
   }
 
-  // CSV header
-  const headers = [
-    "id",
-    "date",
-    "time",
-    "systolic",
-    "diastolic",
-    "pulse",
-    "body_position",
-    "note",
-  ];
-  const csvRows = [headers.join(",")];
-
-  // Sort oldest first for export
   const sortedReadings = [...filteredReadings].sort(
     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
   );
 
-  // Add data rows
-  sortedReadings.forEach((reading) => {
-    const row = [
-      escapeCSV(reading._id),
-      escapeCSV(formatDate(reading.timestamp)),
-      escapeCSV(formatTime(reading.timestamp)),
-      escapeCSV(reading.systolic),
-      escapeCSV(reading.diastolic),
-      escapeCSV(reading.pulse || ""),
-      escapeCSV(reading.bodyPosition),
-      escapeCSV(reading.note || ""),
-    ];
-    csvRows.push(row.join(","));
-  });
+  if (sortedReadings.length === 0) {
+    alert("No readings available for the selected date range.");
+    return;
+  }
 
-  const csvContent = csvRows.join("\n");
-  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
+  const doc = new jsPDF({ unit: "pt", format: "a4" });
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
 
-  const link = document.createElement("a");
-  link.href = url;
+  const title = "BP Tracker Readings";
   const dateStr = formatDate(new Date().toISOString());
   const rangeStr =
-    startDate || endDate
-      ? `_${startDate || "start"}_to_${endDate || "end"}`
-      : "";
-  link.download = `bp-readings-${dateStr}${rangeStr}.csv`;
-  link.click();
+    startDate || endDate ? ` (${startDate || "start"} to ${endDate || "end"})` : "";
 
-  URL.revokeObjectURL(url);
+  const toRgb = (hex: string) => {
+    const normalized = hex.replace("#", "");
+    if (normalized.length !== 6) return { r: 91, g: 108, b: 244 };
+    const num = parseInt(normalized, 16);
+    return {
+      r: (num >> 16) & 255,
+      g: (num >> 8) & 255,
+      b: num & 255,
+    };
+  };
+
+  const mix = (color: string, target: string, weight: number) => {
+    const a = toRgb(color);
+    const b = toRgb(target);
+    const clamp = (val: number) => Math.min(255, Math.max(0, val));
+    const toHex = (val: number) => clamp(val).toString(16).padStart(2, "0");
+    const r = Math.round(a.r * (1 - weight) + b.r * weight);
+    const g = Math.round(a.g * (1 - weight) + b.g * weight);
+    const bVal = Math.round(a.b * (1 - weight) + b.b * weight);
+    return `#${toHex(r)}${toHex(g)}${toHex(bVal)}`;
+  };
+
+  const rootStyles = getComputedStyle(document.documentElement);
+  const primary = rootStyles.getPropertyValue("--primary").trim() || "#5b6cf4";
+  const primaryStrong =
+    rootStyles.getPropertyValue("--primary-strong").trim() || "#4555f3";
+  const primarySoft = mix(primary, "#ffffff", 0.86);
+  const primaryStroke = mix(primary, "#000000", 0.2);
+  const rowBorder = mix(primary, "#ffffff", 0.9);
+  const chartPrimary = primaryStrong || primary;
+  const chartSecondary = mix(primary, "#ffffff", 0.35);
+  const primarySoftRgb = toRgb(primarySoft);
+  const primaryStrokeRgb = toRgb(primaryStroke);
+  const rowBorderRgb = toRgb(rowBorder);
+
+  const titleRgb = toRgb(primaryStrong);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.setTextColor(titleRgb.r, titleRgb.g, titleRgb.b);
+  doc.text(title, 40, 40);
+  doc.setDrawColor(titleRgb.r, titleRgb.g, titleRgb.b);
+  doc.setLineWidth(2);
+  doc.line(40, 46, 140, 46);
+  doc.setFontSize(11);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(100);
+  doc.text(`Exported: ${dateStr}${rangeStr}`, 40, 60);
+  if (patientName) {
+    doc.setTextColor(70);
+    doc.text(`Patient: ${patientName}`, 40, 76);
+  }
+
+  const headers = ["Date", "Time", "Sys", "Dia", "Pulse", "Pos", "Note"];
+  const columns = [40, 120, 190, 235, 290, 350, 420];
+  const maxNoteLength = 32;
+
+  let y = 90;
+
+  const drawTableHeader = (rowY: number) => {
+    doc.setTextColor(12);
+    doc.setFont("helvetica", "bold");
+    doc.setFillColor(primarySoftRgb.r, primarySoftRgb.g, primarySoftRgb.b);
+    doc.setDrawColor(primaryStrokeRgb.r, primaryStrokeRgb.g, primaryStrokeRgb.b);
+    doc.setLineWidth(0.8);
+    doc.roundedRect(40, rowY - 14, pageWidth - 80, 22, 6, 6, "FD");
+    headers.forEach((header, idx) => {
+      doc.text(header, columns[idx], rowY);
+    });
+  };
+
+  const avgValue = (key: "systolic" | "diastolic") =>
+    Math.round(
+      sortedReadings.reduce((sum, reading) => sum + reading[key], 0) /
+        sortedReadings.length
+    );
+
+  const avgSystolic = avgValue("systolic");
+  const avgDiastolic = avgValue("diastolic");
+  const highestReading = sortedReadings.reduce((max, reading) =>
+    reading.systolic > max.systolic ? reading : max
+  );
+  const lowestReading = sortedReadings.reduce((min, reading) =>
+    reading.systolic < min.systolic ? reading : min
+  );
+
+  const summaryNotes = [
+    `Total readings: ${sortedReadings.length}`,
+    `Average BP: ${avgSystolic}/${avgDiastolic} mmHg`,
+    `Highest reading: ${highestReading.systolic}/${highestReading.diastolic} mmHg`,
+    `Lowest reading: ${lowestReading.systolic}/${lowestReading.diastolic} mmHg`,
+  ];
+
+  const chartCanvas = document.createElement("canvas");
+  chartCanvas.width = 620;
+  chartCanvas.height = 200;
+  const chartCtx = chartCanvas.getContext("2d");
+
+  if (chartCtx) {
+    chartCtx.fillStyle = "#ffffff";
+    chartCtx.fillRect(0, 0, chartCanvas.width, chartCanvas.height);
+
+    const padding = { top: 20, right: 20, bottom: 30, left: 40 };
+    const width = chartCanvas.width - padding.left - padding.right;
+    const height = chartCanvas.height - padding.top - padding.bottom;
+
+    const systolicValues = sortedReadings.map((reading) => reading.systolic);
+    const diastolicValues = sortedReadings.map((reading) => reading.diastolic);
+    const minValue = Math.min(...diastolicValues) - 5;
+    const maxValue = Math.max(...systolicValues) + 5;
+
+    const toX = (index: number) =>
+      padding.left + (width * index) / Math.max(1, sortedReadings.length - 1);
+    const toY = (value: number) =>
+      padding.top + height - ((value - minValue) / (maxValue - minValue)) * height;
+
+    chartCtx.strokeStyle = "#e2e8f0";
+    chartCtx.lineWidth = 1;
+    chartCtx.beginPath();
+    chartCtx.moveTo(padding.left, padding.top);
+    chartCtx.lineTo(padding.left, padding.top + height);
+    chartCtx.lineTo(padding.left + width, padding.top + height);
+    chartCtx.stroke();
+
+    chartCtx.fillStyle = "#64748b";
+    chartCtx.font = "10px Helvetica";
+    const yLabels = 4;
+    for (let i = 0; i <= yLabels; i += 1) {
+      const value = Math.round(minValue + ((maxValue - minValue) / yLabels) * i);
+      const yPos = toY(value);
+      chartCtx.fillText(String(value), 8, yPos + 3);
+      chartCtx.strokeStyle = "#f1f5f9";
+      chartCtx.beginPath();
+      chartCtx.moveTo(padding.left, yPos);
+      chartCtx.lineTo(padding.left + width, yPos);
+      chartCtx.stroke();
+    }
+
+    const xStep = Math.max(1, Math.floor(sortedReadings.length / 5));
+    sortedReadings.forEach((reading, index) => {
+      if (index % xStep !== 0 && index !== sortedReadings.length - 1) return;
+      const x = toX(index);
+      const dateLabel = formatDate(reading.timestamp);
+      chartCtx.fillText(dateLabel, x - 16, padding.top + height + 16);
+    });
+
+    chartCtx.fillStyle = "#94a3b8";
+    chartCtx.fillText("Date", padding.left + width - 24, padding.top + height + 28);
+    chartCtx.save();
+    chartCtx.translate(14, padding.top + height / 2);
+    chartCtx.rotate(-Math.PI / 2);
+    chartCtx.fillText("mmHg", 0, 0);
+    chartCtx.restore();
+
+    const drawLine = (values: number[], color: string) => {
+      chartCtx.strokeStyle = color;
+      chartCtx.lineWidth = 2;
+      chartCtx.beginPath();
+      values.forEach((value, index) => {
+        const x = toX(index);
+        const yPos = toY(value);
+        if (index === 0) {
+          chartCtx.moveTo(x, yPos);
+        } else {
+          chartCtx.lineTo(x, yPos);
+        }
+      });
+      chartCtx.stroke();
+    };
+
+    drawLine(systolicValues, chartPrimary);
+    drawLine(diastolicValues, chartSecondary);
+
+    chartCtx.fillStyle = chartPrimary;
+    chartCtx.fillText("Systolic", padding.left + 10, padding.top + 12);
+    chartCtx.fillStyle = chartSecondary;
+    chartCtx.fillText("Diastolic", padding.left + 90, padding.top + 12);
+  }
+
+  const chartDataUrl = chartCanvas.toDataURL("image/png");
+  doc.addImage(chartDataUrl, "PNG", 40, y, pageWidth - 80, 150);
+  y += 174;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(12);
+  doc.setTextColor(24);
+  doc.text("Summary Notes", 40, y);
+  y += 12;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(11);
+  doc.setDrawColor(primaryStrokeRgb.r, primaryStrokeRgb.g, primaryStrokeRgb.b);
+  doc.setFillColor(primarySoftRgb.r, primarySoftRgb.g, primarySoftRgb.b);
+  const notesBoxHeight = summaryNotes.length * 16 + 22;
+  doc.roundedRect(40, y, pageWidth - 80, notesBoxHeight, 10, 10, "FD");
+  summaryNotes.forEach((note, index) => {
+    doc.text(note, 56, y + 22 + index * 16);
+  });
+  y += notesBoxHeight + 18;
+
+  drawTableHeader(y);
+  y += 24;
+  doc.setFont("helvetica", "normal");
+  sortedReadings.forEach((reading) => {
+    if (y > pageHeight - 72) {
+      doc.addPage();
+      y = 40;
+      drawTableHeader(y);
+      y += 24;
+      doc.setFont("helvetica", "normal");
+    }
+
+    const note = reading.note
+      ? reading.note.length > maxNoteLength
+        ? `${reading.note.slice(0, maxNoteLength)}...`
+        : reading.note
+      : "";
+
+    const row = [
+      formatDate(reading.timestamp),
+      formatTimeIST(reading.timestamp),
+      String(reading.systolic),
+      String(reading.diastolic),
+      reading.pulse ? String(reading.pulse) : "-",
+      reading.bodyPosition,
+      note,
+    ];
+
+    doc.setDrawColor(rowBorderRgb.r, rowBorderRgb.g, rowBorderRgb.b);
+    doc.rect(40, y - 14, pageWidth - 80, 22);
+    row.forEach((value, idx) => {
+      doc.text(value, columns[idx], y);
+    });
+
+    y += 22;
+  });
+
+  const fileRange =
+    startDate || endDate ? `_${startDate || "start"}_to_${endDate || "end"}` : "";
+  doc.save(`bp-readings-${dateStr}${fileRange}.pdf`);
 }
 
 function calculateStats(
@@ -160,7 +371,7 @@ function calculateStats(
   };
 }
 
-export function SummaryPage({ readings }: SummaryPageProps) {
+export function SummaryPage({ readings, userName }: SummaryPageProps) {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
@@ -201,7 +412,7 @@ export function SummaryPage({ readings }: SummaryPageProps) {
     : null;
 
   const handleExport = () => {
-    downloadCSV(readings, startDate, endDate);
+    downloadPDF(readings, startDate, endDate, userName);
   };
 
   if (readings.length === 0) {
@@ -628,7 +839,7 @@ export function SummaryPage({ readings }: SummaryPageProps) {
         </div>
         <div style={styles.exportSection}>
           <p style={styles.exportDescription}>
-            Export your readings as CSV for your healthcare provider.
+            Export a doctor-ready PDF with charts and summary notes.
           </p>
 
           <div style={styles.dateFilters}>
@@ -683,7 +894,7 @@ export function SummaryPage({ readings }: SummaryPageProps) {
               }}
             >
               <Download size={18} />
-              Download CSV
+              Download PDF
               {(startDate || endDate) && (
                 <span style={styles.exportButtonSubtext}>
                   ({startDate || "start"} to {endDate || "end"})
