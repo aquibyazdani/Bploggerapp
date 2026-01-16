@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { DashboardPage } from "./components/DashboardPage";
 import { ReadingsPage } from "./components/ReadingsPage";
@@ -44,6 +44,19 @@ function AppContent() {
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [themeColor, setThemeColor] = useState(DEFAULT_THEME_COLOR);
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+  const reminderTimes = useMemo(() => {
+    const raw = import.meta.env.VITE_REMINDER_TIMES as string | undefined;
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed.map((time) => String(time));
+      }
+    } catch (error) {
+      // ignore malformed env
+    }
+    return [];
+  }, []);
 
   const applyThemeColor = useCallback((color: string) => {
     const hex = color.trim();
@@ -400,6 +413,9 @@ function AppContent() {
               setThemeColor(DEFAULT_THEME_COLOR);
             }}
             email={user?.email}
+            reminderTimes={reminderTimes}
+            apiBaseUrl={apiBaseUrl}
+            token={token}
           />
         )}
       </main>
