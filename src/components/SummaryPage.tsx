@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Reading } from "../App";
-import { getBPCategory } from "../utils/bp";
+import { getBPCategory, getBPBreakdown } from "../utils/bp";
 import {
   BarChart3,
   Download,
@@ -196,6 +196,9 @@ export function SummaryPage({ readings }: SummaryPageProps) {
   const category = lastReading
     ? getBPCategory(lastReading.systolic, lastReading.diastolic)
     : null;
+  const breakdown = lastReading
+    ? getBPBreakdown(lastReading.systolic, lastReading.diastolic)
+    : null;
 
   const handleExport = () => {
     downloadCSV(readings, startDate, endDate);
@@ -364,15 +367,48 @@ export function SummaryPage({ readings }: SummaryPageProps) {
             >
               <Lightbulb size={12} color={category.color} />
               <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
-                <span
-                  style={{
-                    ...styles.categoryLabel,
-                    color: category.color,
-                    fontSize: "11px",
-                    margin: 0,
-                  }}
-                >
-                  {category.label}
+                <span style={styles.categoryLabelRow}>
+                  {breakdown && (
+                    <>
+                      <span style={styles.categoryGroup}>
+                        <span
+                          style={{
+                            ...styles.categoryDot,
+                            backgroundColor: breakdown.systolic.color,
+                          }}
+                        />
+                        <span
+                          style={{
+                            ...styles.categoryLabel,
+                            color: breakdown.systolic.color,
+                            margin: 0,
+                            display: "inline",
+                          }}
+                        >
+                          S: {breakdown.systolic.shortLabel}
+                        </span>
+                      </span>
+                      <span style={styles.categoryDivider}>|</span>
+                      <span style={styles.categoryGroup}>
+                        <span
+                          style={{
+                            ...styles.categoryDot,
+                            backgroundColor: breakdown.diastolic.color,
+                          }}
+                        />
+                        <span
+                          style={{
+                            ...styles.categoryLabel,
+                            color: breakdown.diastolic.color,
+                            margin: 0,
+                            display: "inline",
+                          }}
+                        >
+                          D: {breakdown.diastolic.shortLabel}
+                        </span>
+                      </span>
+                    </>
+                  )}
                 </span>
                 <p
                   style={{
@@ -741,6 +777,26 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: "600",
     display: "block",
     marginBottom: "6px",
+  },
+  categoryLabelRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    flexWrap: "wrap",
+  },
+  categoryGroup: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "4px",
+  },
+  categoryDot: {
+    width: "6px",
+    height: "6px",
+    borderRadius: "999px",
+  },
+  categoryDivider: {
+    color: "var(--muted)",
+    fontSize: "11px",
   },
   categoryMessage: {
     margin: 0,

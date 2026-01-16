@@ -139,3 +139,19 @@ export function getBPCategory(
     message: `${overallMessage} Systolic: ${sysMeta.longLabel}. Diastolic: ${diaMeta.longLabel}.`,
   };
 }
+
+export function getBPBreakdown(
+  systolic: number,
+  diastolic: number
+): {
+  systolic: BPLevelMeta;
+  diastolic: BPLevelMeta;
+} {
+  const sysLevel = getSystolicLevel(systolic);
+  const diaLevel = getDiastolicLevel(diastolic);
+
+  return {
+    systolic: BP_LEVEL_META[sysLevel],
+    diastolic: BP_LEVEL_META[diaLevel],
+  };
+}

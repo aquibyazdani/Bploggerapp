@@ -9,7 +9,7 @@ import {
   Bed,
   BarChart2,
 } from "lucide-react";
-import { getBPCategory } from "../utils/bp";
+import { getBPCategory, getBPBreakdown } from "../utils/bp";
 
 interface ReadingsListProps {
   readings: Reading[];
@@ -100,6 +100,10 @@ export function ReadingsList({
       <div style={styles.cardsContainer}>
         {readings.map((reading) => {
           const category = getBPCategory(reading.systolic, reading.diastolic);
+          const breakdown = getBPBreakdown(
+            reading.systolic,
+            reading.diastolic
+          );
           const isEditing = editingId === reading._id;
 
           return (
@@ -171,11 +175,42 @@ export function ReadingsList({
                   <span
                     style={{
                       ...styles.categoryBadge,
-                      backgroundColor: `${category.color}20`,
-                      color: category.color,
+                      backgroundColor: "var(--surface-muted)",
                     }}
                   >
-                    {category.label}
+                    <span style={styles.categoryGroup}>
+                      <span
+                        style={{
+                          ...styles.categoryDot,
+                          backgroundColor: breakdown.systolic.color,
+                        }}
+                      />
+                      <span
+                        style={{
+                          ...styles.categoryText,
+                          color: breakdown.systolic.color,
+                        }}
+                      >
+                        S: {breakdown.systolic.shortLabel}
+                      </span>
+                    </span>
+                    <span style={styles.categoryDivider}>|</span>
+                    <span style={styles.categoryGroup}>
+                      <span
+                        style={{
+                          ...styles.categoryDot,
+                          backgroundColor: breakdown.diastolic.color,
+                        }}
+                      />
+                      <span
+                        style={{
+                          ...styles.categoryText,
+                          color: breakdown.diastolic.color,
+                        }}
+                      >
+                        D: {breakdown.diastolic.shortLabel}
+                      </span>
+                    </span>
                   </span>
                 </div>
 
@@ -354,6 +389,25 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: "600",
     borderRadius: "6px",
     textAlign: "center",
+  },
+  categoryGroup: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "4px",
+  },
+  categoryDot: {
+    width: "6px",
+    height: "6px",
+    borderRadius: "999px",
+  },
+  categoryText: {
+    fontSize: "9px",
+    fontWeight: "600",
+  },
+  categoryDivider: {
+    margin: "0 6px",
+    color: "var(--muted)",
+    fontSize: "9px",
   },
   infoSection: {
     display: "flex",
