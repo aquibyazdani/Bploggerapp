@@ -1,195 +1,96 @@
-# BP Tracker - Blood Pressure Tracking App
+# BP Tracker App
 
-A modern, full-stack web application for tracking blood pressure readings with user authentication and data visualization.
+BP Tracker is a mobile-first blood pressure logging app. It lets users record systolic/diastolic readings, track trends, export data, and personalize the UI theme color. The interface is designed as a compact, modern single-page experience with bottom navigation.
 
-## Features
+## What This App Does
 
-- 🔐 Auth0 authentication
-- 📊 Dashboard with BP statistics
-- 📝 Add, edit, delete BP readings
-- 📈 Trends and data visualization
-- 📋 CSV export functionality
-- 📱 Mobile-responsive design
-- ☁️ Cloud database (MongoDB Atlas)
+- Records blood pressure readings with systolic, diastolic, pulse, position, and notes.
+- Classifies readings using Indian blood pressure guidelines with separate systolic/diastolic status.
+- Shows Dashboard, Readings, Trends, and Summary views.
+- Exports readings to CSV with optional date range filters.
+- Supports a user-selected theme color stored in local storage.
+- Works as a PWA with an “Add to Homescreen” prompt.
+
+## App Pages
+
+- Dashboard: overview cards, latest stats, and body position summary.
+- Readings: list with edit/delete and systolic/diastolic status badges.
+- Trends & Analysis: averages and insights with position distribution.
+- Summary & Export: latest reading context + 7/30/90/all-time statistics and CSV export.
+- Settings: pick a primary theme color and reset to default.
+
+## Key UX Details
+
+- Bottom navigation with center “+” action.
+- Smooth scroll to top on page changes.
+- Delete confirmation modal for readings.
+- Color system based on CSS variables for theming.
 
 ## Tech Stack
 
-### Frontend
+- React 18 + TypeScript
+- Vite
+- Lucide React
+- CSS-in-JS styles (inline style objects)
 
-- React 18 with TypeScript
-- Vite (build tool)
-- Lucide React (icons)
-- Custom CSS-in-JS styling
+## Data & API
 
-### Backend
+The frontend uses a REST API defined by `VITE_API_BASE_URL` and expects these endpoints:
 
-- Node.js with Express.js
-- MongoDB with Mongoose
-- Auth0 JWT verification
-- bcrypt password hashing
-- Express Validator
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/readings`
+- `POST /api/readings`
+- `PUT /api/readings/:id`
+- `DELETE /api/readings/:id`
 
-## Getting Started
-
-### Prerequisites
-
-- Node.js (v16 or higher)
-- npm or yarn
-- MongoDB Atlas account (for database)
-
-### Installation
-
-1. **Clone the repository**
-
-   ```bash
-   git clone <repository-url>
-   cd bploggerapp
-   ```
-
-2. **Install dependencies**
-
-   ```bash
-   npm install
-   cd backend && npm install && cd ..
-   ```
-
-3. **Environment Setup**
-
-   **Frontend (.env)**
-
-   ```bash
-   cp .env.example .env
-   # Edit .env with your API URL
-   ```
-
-   **Backend (backend/.env)**
-
-   ```bash
-   cd backend
-   # Set Auth0 and MongoDB variables before running
-   ```
-
-4. **Start the Backend**
-
-   ```bash
-   cd backend
-   npm run dev
-   # Server runs on http://localhost:5001
-   ```
-
-5. **Start the Frontend**
-   ```bash
-   # In a new terminal, from project root
-   npm run dev
-   # App runs on http://localhost:3000 (or next available port)
-   ```
+Note: The backend implementation is not included in this repo.
 
 ## Environment Variables
 
-### Frontend (.env)
+Create `.env`:
 
 ```env
 VITE_API_BASE_URL=http://localhost:5001/api
-VITE_AUTH0_DOMAIN=your-tenant.us.auth0.com
-VITE_AUTH0_CLIENT_ID=your_auth0_client_id
-VITE_AUTH0_AUDIENCE=https://bplogger-api
 ```
 
-### Backend (backend/.env)
+## Local Development
 
-```env
-PORT=5001
-MONGODB_URI=mongodb+srv://your-connection-string
-AUTH0_DOMAIN=your-tenant.us.auth0.com
-AUTH0_AUDIENCE=https://bplogger-api
-ALLOWED_ORIGINS=http://localhost:3000
-NODE_ENV=development
+```bash
+npm install
+npm run dev
 ```
 
-## API Endpoints
+## Build
 
-### Authentication
-
-- `GET /api/auth/profile` - Get user profile (requires Auth0 JWT)
-
-### Readings
-
-- `GET /api/readings` - Get user's readings
-- `POST /api/readings` - Create new reading
-- `PUT /api/readings/:id` - Update reading
-- `DELETE /api/readings/:id` - Delete reading
+```bash
+npm run build
+```
 
 ## Project Structure
 
 ```
-bploggerapp/
-├── src/
-│   ├── components/     # React components
-│   ├── contexts/       # React contexts (Auth)
-│   ├── vite-env.d.ts   # TypeScript declarations
-│   └── App.tsx         # Main app component
-├── backend/
-│   ├── models/         # MongoDB models
-│   ├── routes/         # API routes
-│   ├── middleware/     # Auth middleware
-│   └── server.js       # Express server
-├── public/             # Static assets
-├── .env.example        # Environment template
-└── package.json
+src/
+  App.tsx                # App shell, routing, nav, theme logic
+  components/
+    DashboardPage.tsx
+    ReadingsPage.tsx
+    ReadingsList.tsx
+    ReadingForm.tsx
+    TrendsPage.tsx
+    SummaryPage.tsx
+    SettingsPage.tsx
+    AddToHomescreenModal.tsx
+  contexts/
+    AuthContext.tsx       # Auth state (token + user storage)
+  utils/
+    bp.ts                 # BP category logic (Indian guidelines)
+  styles/
+    globals.css
+  index.css               # Global CSS + theme tokens
 ```
 
-## Development
+## Notes
 
-### Available Scripts
-
-**Frontend:**
-
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-
-**Backend:**
-
-- `npm run dev` - Start with nodemon
-- `npm start` - Start production server
-- `npm test` - Run tests
-
-### Code Style
-
-- TypeScript for type safety
-- ESLint for code linting
-- Prettier for code formatting
-
-## Deployment
-
-### Frontend (Netlify)
-
-1. Build command: `npm run build`
-2. Publish directory: `build`
-3. Set environment variables in Netlify dashboard
-
-### Backend (Heroku/Railway/Vercel)
-
-1. Set environment variables
-2. Deploy from `backend/` directory
-3. Update frontend `.env` with production API URL
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
-## License
-
-MIT License - see LICENSE file for details
-
-## Support
-
-For questions or issues, please open an issue on GitHub.
-
----
-
-**Built with ❤️ for health-conscious individuals**
+- Theme color is saved in `localStorage` and applied via CSS variables.
+- BP category logic separates systolic and diastolic labels.
