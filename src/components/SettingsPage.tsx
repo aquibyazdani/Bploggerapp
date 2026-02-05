@@ -242,7 +242,7 @@ export function SettingsPage({
         </div>
       </div>
 
-      <div style={styles.card}>
+      {/* <div style={styles.card}>
         <div style={styles.cardHeaderColumn}>
           <h2 style={styles.cardTitle}>Family Profiles</h2>
           <p style={styles.cardDescription}>
@@ -346,7 +346,7 @@ export function SettingsPage({
             )}
           </div>
         </form>
-      </div>
+      </div> */}
 
       <div style={styles.card}>
         <div style={styles.cardHeader}>
