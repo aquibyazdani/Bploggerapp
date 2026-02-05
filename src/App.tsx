@@ -558,7 +558,7 @@ function AppContent() {
         <div style={styles.headerContent}>
           <Activity size={24} style={styles.headerIcon} />
           <h1 style={styles.headerTitle}>BP Tracker</h1>
-          {visibleProfiles.length > 1 && (
+          {/* {visibleProfiles.length > 1 && (
             <div style={styles.profileSelector}>
               <div style={styles.profileSelectWrap}>
                 <span style={styles.profileDot} />
@@ -582,7 +582,7 @@ function AppContent() {
                 </button>
               </div>
             </div>
-          )}
+          )} */}
           <div style={styles.headerActions}>
             <button
               onClick={() => setCurrentPage("settings")}
