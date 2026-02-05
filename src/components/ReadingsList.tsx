@@ -100,10 +100,7 @@ export function ReadingsList({
       <div style={styles.cardsContainer}>
         {readings.map((reading) => {
           const category = getBPCategory(reading.systolic, reading.diastolic);
-          const breakdown = getBPBreakdown(
-            reading.systolic,
-            reading.diastolic
-          );
+          const breakdown = getBPBreakdown(reading.systolic, reading.diastolic);
           const isEditing = editingId === reading._id;
 
           return (
@@ -229,19 +226,13 @@ export function ReadingsList({
 
       {pendingDelete && (
         <div style={styles.confirmOverlay} onClick={handleDeleteCancel}>
-          <div
-            style={styles.confirmCard}
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div style={styles.confirmCard} onClick={(e) => e.stopPropagation()}>
             <h3 style={styles.confirmTitle}>Delete reading?</h3>
             <p style={styles.confirmText}>
               This will permanently remove the reading from your history.
             </p>
             <div style={styles.confirmActions}>
-              <button
-                style={styles.confirmCancel}
-                onClick={handleDeleteCancel}
-              >
+              <button style={styles.confirmCancel} onClick={handleDeleteCancel}>
                 Cancel
               </button>
               <button
@@ -367,7 +358,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     gap: "2px",
   },
   bpNumber: {
-    fontSize: "18px",
+    fontSize: "16.5px",
     fontWeight: "700",
     color: "var(--text-strong)",
     lineHeight: "1",
@@ -378,7 +369,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: "#cbd5f5",
   },
   bpUnit: {
-    fontSize: "11px",
+    fontSize: "10px",
     fontWeight: "500",
     color: "var(--muted)",
     marginLeft: "2px",
@@ -420,7 +411,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     gap: "3px",
   },
   infoText: {
-    fontSize: "11px",
+    fontSize: "10px",
     fontWeight: "500",
     color: "var(--muted)",
   },
