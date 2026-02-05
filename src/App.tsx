@@ -908,6 +908,9 @@ const styles: { [key: string]: React.CSSProperties } = {
     textAlign: "left",
     flex: 1,
     cursor: "pointer",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
   },
   profileCaretButton: {
     background: "rgba(255, 255, 255, 0.18)",

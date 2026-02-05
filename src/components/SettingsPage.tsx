@@ -802,11 +802,17 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontSize: "14px",
     fontWeight: "600",
     color: "var(--text-strong)",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
   },
   profileRelation: {
     fontSize: "12px",
     color: "var(--muted)",
     textTransform: "capitalize",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
   },
   profileActions: {
     display: "flex",
@@ -834,7 +840,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   profileFormRow: {
     display: "grid",
-    gridTemplateColumns: "1fr 1fr",
+    gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
     gap: "10px",
   },
   profileInput: {
@@ -844,6 +850,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     backgroundColor: "var(--surface-muted)",
     fontSize: "13px",
     outline: "none",
+    minWidth: 0,
+    width: "100%",
   },
   profileFormActions: {
     display: "flex",
