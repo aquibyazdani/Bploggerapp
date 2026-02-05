@@ -7,6 +7,7 @@ import { SummaryPage } from "./components/SummaryPage";
 import { SettingsPage } from "./components/SettingsPage";
 import { LoginPage } from "./components/LoginPage";
 import { AddToHomescreenModal } from "./components/AddToHomescreenModal";
+import { Profile } from "./types/profile";
 import {
   Activity,
   Home,
@@ -20,6 +21,7 @@ import {
 
 export interface Reading {
   _id: string;
+  profile?: string;
   systolic: number;
   diastolic: number;
   pulse?: number;
@@ -39,6 +41,11 @@ function AppContent() {
   const [readingsLoading, setReadingsLoading] = useState(false);
   const [editingReading, setEditingReading] = useState<Reading | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
+  const [profilesLoading, setProfilesLoading] = useState(false);
+  const [selectedProfileId, setSelectedProfileId] = useState<string | null>(
+    () => localStorage.getItem("selectedProfileId")
+  );
   const [showAddToHomescreenModal, setShowAddToHomescreenModal] =
     useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -93,20 +100,68 @@ function AppContent() {
     root.setProperty("--primary-rgb", `${rgb.r}, ${rgb.g}, ${rgb.b}`);
   }, []);
 
+  const selectProfile = useCallback((profileId: string | null) => {
+    setSelectedProfileId(profileId);
+    if (profileId) {
+      localStorage.setItem("selectedProfileId", profileId);
+    } else {
+      localStorage.removeItem("selectedProfileId");
+      setReadings([]);
+      setEditingReading(null);
+      setShowForm(false);
+    }
+  }, []);
+
+  const loadProfiles = useCallback(async () => {
+    if (!token) return;
+
+    setProfilesLoading(true);
+    try {
+      const response = await fetch(`${apiBaseUrl}/profiles`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data: Profile[] = await response.json();
+        setProfiles(data);
+
+        const storedId = localStorage.getItem("selectedProfileId");
+        const storedProfile = data.find((profile) => profile._id === storedId);
+        const fallback =
+          storedProfile ||
+          data.find((profile) => profile.isDefault) ||
+          data[0] ||
+          null;
+        selectProfile(fallback ? fallback._id : null);
+      }
+    } catch (error) {
+      console.error("Error loading profiles:", error);
+    } finally {
+      setProfilesLoading(false);
+    }
+  }, [apiBaseUrl, selectProfile, token]);
+
   // Load readings from API
   const loadReadings = useCallback(
     async (withLoading = true) => {
-      if (!token) return;
+      if (!token || !selectedProfileId) return;
 
       if (withLoading) {
         setReadingsLoading(true);
       }
       try {
-        const response = await fetch(`${apiBaseUrl}/readings`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          `${apiBaseUrl}/readings?profileId=${encodeURIComponent(
+            selectedProfileId
+          )}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (response.ok) {
           const data = await response.json();
@@ -120,12 +175,96 @@ function AppContent() {
         }
       }
     },
-    [apiBaseUrl, token]
+    [apiBaseUrl, selectedProfileId, token]
+  );
+
+  const handleCreateProfile = useCallback(
+    async (profile: { name: string; relation: string }) => {
+      if (!token) return;
+
+      try {
+        const response = await fetch(`${apiBaseUrl}/profiles`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(profile),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to add profile");
+        }
+
+        await loadProfiles();
+      } catch (error) {
+        console.error("Error adding profile:", error);
+      }
+    },
+    [apiBaseUrl, loadProfiles, token]
+  );
+
+  const handleUpdateProfile = useCallback(
+    async (
+      profileId: string,
+      updates: { name: string; relation: string }
+    ) => {
+      if (!token) return;
+
+      try {
+        const response = await fetch(`${apiBaseUrl}/profiles/${profileId}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(updates),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to update profile");
+        }
+
+        await loadProfiles();
+      } catch (error) {
+        console.error("Error updating profile:", error);
+      }
+    },
+    [apiBaseUrl, loadProfiles, token]
+  );
+
+  const handleDeleteProfile = useCallback(
+    async (profileId: string) => {
+      if (!token) return;
+
+      try {
+        const response = await fetch(`${apiBaseUrl}/profiles/${profileId}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.ok) {
+          await loadProfiles();
+        } else {
+          throw new Error("Failed to delete profile");
+        }
+      } catch (error) {
+        console.error("Error deleting profile:", error);
+      }
+    },
+    [apiBaseUrl, loadProfiles, token]
+  );
+
+  const selectedProfile = useMemo(
+    () => profiles.find((profile) => profile._id === selectedProfileId) || null,
+    [profiles, selectedProfileId]
   );
 
   useEffect(() => {
     if (user && token) {
-      loadReadings();
+      loadProfiles();
       // Clear hash when user is authenticated
       window.location.hash = "";
 
@@ -139,7 +278,13 @@ function AppContent() {
 
       return () => clearTimeout(timer);
     }
-  }, [loadReadings, token, user]);
+  }, [loadProfiles, token, user]);
+
+  useEffect(() => {
+    if (user && token && selectedProfileId) {
+      loadReadings();
+    }
+  }, [loadReadings, selectedProfileId, token, user]);
 
   useEffect(() => {
     const storedColor = localStorage.getItem("themeColor");
@@ -214,7 +359,7 @@ function AppContent() {
 
   const handleAddReading = useCallback(
     async (reading: Omit<Reading, "_id" | "timestamp">) => {
-      if (!token) return;
+      if (!token || !selectedProfileId) return;
 
       try {
         setReadingsLoading(true);
@@ -224,7 +369,7 @@ function AppContent() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(reading),
+          body: JSON.stringify({ ...reading, profileId: selectedProfileId }),
         });
 
         if (!response.ok) {
@@ -239,7 +384,7 @@ function AppContent() {
         setReadingsLoading(false);
       }
     },
-    [apiBaseUrl, loadReadings, token]
+    [apiBaseUrl, loadReadings, selectedProfileId, token]
   );
 
   const handleEditReading = useCallback((reading: Reading) => {
@@ -250,7 +395,7 @@ function AppContent() {
 
   const handleUpdateReading = useCallback(
     async (updatedReading: Reading) => {
-      if (!token) return;
+      if (!token || !selectedProfileId) return;
 
       try {
         setReadingsLoading(true);
@@ -269,6 +414,7 @@ function AppContent() {
               pulse: updatedReading.pulse,
               bodyPosition: updatedReading.bodyPosition,
               note: updatedReading.note,
+              profileId: selectedProfileId,
             }),
           }
         );
@@ -286,7 +432,7 @@ function AppContent() {
         setReadingsLoading(false);
       }
     },
-    [apiBaseUrl, loadReadings, token]
+    [apiBaseUrl, loadReadings, selectedProfileId, token]
   );
 
   const handleDeleteReading = useCallback(
@@ -335,9 +481,11 @@ function AppContent() {
     logout();
     setCurrentPage("dashboard");
     setReadings([]);
+    setProfiles([]);
+    selectProfile(null);
     // Clear hash on logout
     window.location.hash = "";
-  }, [logout]);
+  }, [logout, selectProfile]);
 
   if (loading) {
     return (
@@ -365,6 +513,28 @@ function AppContent() {
         <div style={styles.headerContent}>
           <Activity size={24} style={styles.headerIcon} />
           <h1 style={styles.headerTitle}>BP Tracker</h1>
+          {profiles.length > 0 && (
+            <div style={styles.profileSelector}>
+              <select
+                value={selectedProfileId || ""}
+                onChange={(event) => selectProfile(event.target.value)}
+                style={styles.profileSelect}
+                aria-label="Select profile"
+                disabled={profilesLoading}
+              >
+                {!selectedProfileId && (
+                  <option value="" disabled>
+                    Select profile
+                  </option>
+                )}
+                {profiles.map((profile) => (
+                  <option key={profile._id} value={profile._id}>
+                    {profile.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div style={styles.headerActions}>
             <button
               onClick={() => setCurrentPage("settings")}
@@ -387,7 +557,10 @@ function AppContent() {
       {/* Main Content */}
       <main style={styles.main}>
         {currentPage === "dashboard" && (
-          <DashboardPage readings={readings} userName={user.name} />
+          <DashboardPage
+            readings={readings}
+            userName={selectedProfile?.name || user.name}
+          />
         )}
         {currentPage === "readings" && (
           <ReadingsPage
@@ -404,7 +577,10 @@ function AppContent() {
         )}
         {currentPage === "trends" && <TrendsPage readings={readings} />}
         {currentPage === "summary" && (
-          <SummaryPage readings={readings} userName={user?.name} />
+          <SummaryPage
+            readings={readings}
+            userName={selectedProfile?.name || user?.name}
+          />
         )}
         {currentPage === "settings" && (
           <SettingsPage
@@ -418,6 +594,12 @@ function AppContent() {
             reminderTimes={reminderTimes}
             apiBaseUrl={apiBaseUrl}
             token={token}
+            profiles={profiles}
+            selectedProfileId={selectedProfileId}
+            onSelectProfile={selectProfile}
+            onCreateProfile={handleCreateProfile}
+            onUpdateProfile={handleUpdateProfile}
+            onDeleteProfile={handleDeleteProfile}
           />
         )}
       </main>
@@ -585,6 +767,26 @@ const styles: { [key: string]: React.CSSProperties } = {
     margin: 0,
     letterSpacing: "-0.01em",
     fontFamily: "var(--font-display)",
+  },
+  profileSelector: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
+    flex: 1,
+    justifyContent: "center",
+  },
+  profileSelect: {
+    background: "rgba(255, 255, 255, 0.2)",
+    border: "1px solid rgba(255, 255, 255, 0.35)",
+    color: "#ffffff",
+    fontSize: "12px",
+    fontWeight: "600",
+    borderRadius: "10px",
+    padding: "6px 10px",
+    minWidth: "110px",
+    maxWidth: "150px",
+    outline: "none",
+    appearance: "none",
   },
   headerActions: {
     display: "flex",

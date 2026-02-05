@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { Profile } from "../types/profile";
 
 interface SettingsPageProps {
   themeColor: string;
@@ -8,6 +9,15 @@ interface SettingsPageProps {
   reminderTimes: string[];
   apiBaseUrl: string;
   token: string | null;
+  profiles: Profile[];
+  selectedProfileId: string | null;
+  onSelectProfile: (profileId: string | null) => void;
+  onCreateProfile: (profile: { name: string; relation: string }) => void;
+  onUpdateProfile: (
+    profileId: string,
+    updates: { name: string; relation: string }
+  ) => void;
+  onDeleteProfile: (profileId: string) => void;
 }
 
 export function SettingsPage({
@@ -18,6 +28,12 @@ export function SettingsPage({
   reminderTimes,
   apiBaseUrl,
   token,
+  profiles,
+  selectedProfileId,
+  onSelectProfile,
+  onCreateProfile,
+  onUpdateProfile,
+  onDeleteProfile,
 }: SettingsPageProps) {
   const [remindersEnabled, setRemindersEnabled] = useState(() => {
     return localStorage.getItem("remindersEnabled") === "true";
@@ -26,10 +42,17 @@ export function SettingsPage({
     typeof Notification !== "undefined" ? Notification.permission : "default"
   );
   const [status, setStatus] = useState<"idle" | "working">("idle");
-  const [error, setError] = useState("");
+  const [reminderError, setReminderError] = useState("");
+  const [profileError, setProfileError] = useState("");
   const [confirmAction, setConfirmAction] = useState<
     "enable" | "disable" | null
   >(null);
+  const [profileForm, setProfileForm] = useState({
+    name: "",
+    relation: "",
+  });
+  const [editingProfileId, setEditingProfileId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<Profile | null>(null);
 
   const formattedTimes = useMemo(() => {
     const toDisplay = (time: string) => {
@@ -61,30 +84,30 @@ export function SettingsPage({
 
   const handleEnableReminders = async () => {
     if (!token) {
-      setError("Please log in to enable reminders.");
+      setReminderError("Please log in to enable reminders.");
       return;
     }
 
     const publicKey = import.meta.env
       .VITE_VAPID_PUBLIC_KEY as string | undefined;
     if (!publicKey) {
-      setError("Missing VAPID public key configuration.");
+      setReminderError("Missing VAPID public key configuration.");
       return;
     }
 
     if (!("serviceWorker" in navigator)) {
-      setError("Service workers are not supported in this browser.");
+      setReminderError("Service workers are not supported in this browser.");
       return;
     }
 
-    setError("");
+    setReminderError("");
     setStatus("working");
 
     const permissionResult = await Notification.requestPermission();
     setPermission(permissionResult);
     if (permissionResult !== "granted") {
       setStatus("idle");
-      setError("Notification permission was not granted.");
+      setReminderError("Notification permission was not granted.");
       return;
     }
 
@@ -111,7 +134,7 @@ export function SettingsPage({
       localStorage.setItem("remindersEnabled", "true");
       setRemindersEnabled(true);
     } catch (err) {
-      setError(
+      setReminderError(
         err instanceof Error
           ? err.message
           : "Unable to enable reminders."
@@ -122,7 +145,7 @@ export function SettingsPage({
   };
 
   const handleDisableReminders = async () => {
-    setError("");
+    setReminderError("");
     setStatus("working");
 
     try {
@@ -143,7 +166,7 @@ export function SettingsPage({
       localStorage.setItem("remindersEnabled", "false");
       setRemindersEnabled(false);
     } catch (err) {
-      setError(
+      setReminderError(
         err instanceof Error
           ? err.message
           : "Unable to disable reminders."
@@ -164,6 +187,49 @@ export function SettingsPage({
       await handleDisableReminders();
     }
   };
+
+  const handleProfileSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!profileForm.name.trim() || !profileForm.relation.trim()) {
+      setProfileError("Profile name and relation are required.");
+      return;
+    }
+
+    setProfileError("");
+    if (editingProfileId) {
+      onUpdateProfile(editingProfileId, {
+        name: profileForm.name.trim(),
+        relation: profileForm.relation.trim(),
+      });
+    } else {
+      onCreateProfile({
+        name: profileForm.name.trim(),
+        relation: profileForm.relation.trim(),
+      });
+    }
+
+    setProfileForm({ name: "", relation: "" });
+    setEditingProfileId(null);
+  };
+
+  const handleEditProfile = (profile: Profile) => {
+    setProfileForm({ name: profile.name, relation: profile.relation });
+    setEditingProfileId(profile._id);
+  };
+
+  const handleCancelEdit = () => {
+    setProfileForm({ name: "", relation: "" });
+    setEditingProfileId(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return;
+    await onDeleteProfile(deleteTarget._id);
+    if (selectedProfileId === deleteTarget._id) {
+      onSelectProfile(null);
+    }
+    setDeleteTarget(null);
+  };
   return (
     <div style={styles.container}>
       <div style={styles.header}>
@@ -181,6 +247,98 @@ export function SettingsPage({
         <div style={styles.emailRow}>
           <span style={styles.emailValue}>{email || "Not available"}</span>
         </div>
+      </div>
+
+      <div style={styles.card}>
+        <div style={styles.cardHeaderColumn}>
+          <h2 style={styles.cardTitle}>Family Profiles</h2>
+          <p style={styles.cardDescription}>
+            Add family members and switch who you are tracking.
+          </p>
+        </div>
+
+        <div style={styles.profileList}>
+          {profiles.length === 0 ? (
+            <span style={styles.profileEmpty}>No profiles yet.</span>
+          ) : (
+            profiles.map((profile) => (
+              <div key={profile._id} style={styles.profileRow}>
+                <button
+                  style={{
+                    ...styles.profileSelectButton,
+                    ...(selectedProfileId === profile._id
+                      ? styles.profileSelectButtonActive
+                      : {}),
+                  }}
+                  onClick={() => onSelectProfile(profile._id)}
+                >
+                  <span style={styles.profileName}>{profile.name}</span>
+                  <span style={styles.profileRelation}>{profile.relation}</span>
+                </button>
+                <div style={styles.profileActions}>
+                  <button
+                    style={styles.profileActionButton}
+                    onClick={() => handleEditProfile(profile)}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    style={styles.profileDeleteButton}
+                    onClick={() => setDeleteTarget(profile)}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        <form style={styles.profileForm} onSubmit={handleProfileSubmit}>
+          <div style={styles.profileFormRow}>
+            <input
+              type="text"
+              placeholder="Name"
+              value={profileForm.name}
+              onChange={(event) =>
+                setProfileForm((prev) => ({
+                  ...prev,
+                  name: event.target.value,
+                }))
+              }
+              style={styles.profileInput}
+            />
+            <input
+              type="text"
+              placeholder="Relation (e.g., self, spouse)"
+              value={profileForm.relation}
+              onChange={(event) =>
+                setProfileForm((prev) => ({
+                  ...prev,
+                  relation: event.target.value,
+                }))
+              }
+              style={styles.profileInput}
+            />
+          </div>
+          {profileError && (
+            <div style={styles.profileError}>{profileError}</div>
+          )}
+          <div style={styles.profileFormActions}>
+            <button style={styles.profileSubmitButton} type="submit">
+              {editingProfileId ? "Update Profile" : "Add Profile"}
+            </button>
+            {editingProfileId && (
+              <button
+                style={styles.profileCancelButton}
+                type="button"
+                onClick={handleCancelEdit}
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </form>
       </div>
 
       <div style={styles.card}>
@@ -230,6 +388,30 @@ export function SettingsPage({
         </button>
       </div>
 
+      {deleteTarget && (
+        <div style={styles.confirmOverlay} onClick={() => setDeleteTarget(null)}>
+          <div
+            style={styles.confirmCard}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h3 style={styles.confirmTitle}>Delete profile?</h3>
+            <p style={styles.confirmText}>
+              All readings for {deleteTarget.name} will be permanently removed.
+            </p>
+            <div style={styles.confirmActions}>
+              <button
+                style={styles.confirmCancel}
+                onClick={() => setDeleteTarget(null)}
+              >
+                Cancel
+              </button>
+              <button style={styles.confirmDelete} onClick={handleDeleteConfirm}>
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <div style={styles.card}>
         <div style={styles.cardHeader}>
           <div>
@@ -244,7 +426,7 @@ export function SettingsPage({
         </div>
 
         <div style={styles.reminderTimes}>
-          {formattedTimes.length > 0 ? (
+        {formattedTimes.length > 0 ? (
             formattedTimes.map((time) => (
               <span key={time} style={styles.timeChip}>
                 {time}
@@ -255,7 +437,9 @@ export function SettingsPage({
           )}
         </div>
 
-        {error && <div style={styles.errorText}>{error}</div>}
+        {reminderError && (
+          <div style={styles.errorText}>{reminderError}</div>
+        )}
 
         <div style={styles.reminderActions}>
           <button
@@ -571,6 +755,18 @@ const styles: { [key: string]: React.CSSProperties } = {
     cursor: "pointer",
     boxShadow: "0 10px 18px rgba(91, 108, 244, 0.25)",
   },
+  confirmDelete: {
+    flex: 1,
+    padding: "10px 12px",
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#ffffff",
+    background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+    border: "none",
+    borderRadius: "10px",
+    cursor: "pointer",
+    boxShadow: "0 10px 18px rgba(239, 68, 68, 0.25)",
+  },
   emailRow: {
     backgroundColor: "var(--surface-muted)",
     borderRadius: "12px",
@@ -582,5 +778,124 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: "600",
     color: "var(--text-strong)",
     wordBreak: "break-word",
+  },
+  profileList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+    marginTop: "12px",
+  },
+  profileEmpty: {
+    fontSize: "13px",
+    color: "var(--muted)",
+  },
+  profileRow: {
+    display: "flex",
+    gap: "8px",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  profileSelectButton: {
+    flex: 1,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-start",
+    gap: "2px",
+    padding: "10px 12px",
+    backgroundColor: "var(--surface-muted)",
+    border: "1px solid var(--border-strong)",
+    borderRadius: "12px",
+    cursor: "pointer",
+    textAlign: "left",
+  },
+  profileSelectButtonActive: {
+    border: "1px solid var(--primary)",
+    boxShadow: "0 6px 14px rgba(var(--primary-rgb), 0.2)",
+  },
+  profileName: {
+    fontSize: "14px",
+    fontWeight: "600",
+    color: "var(--text-strong)",
+  },
+  profileRelation: {
+    fontSize: "12px",
+    color: "var(--muted)",
+    textTransform: "capitalize",
+  },
+  profileActions: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "6px",
+  },
+  profileActionButton: {
+    backgroundColor: "var(--surface)",
+    border: "1px solid var(--border-strong)",
+    borderRadius: "10px",
+    padding: "6px 10px",
+    fontSize: "12px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  profileDeleteButton: {
+    backgroundColor: "rgba(239, 68, 68, 0.08)",
+    border: "1px solid rgba(239, 68, 68, 0.35)",
+    color: "#ef4444",
+    borderRadius: "10px",
+    padding: "6px 10px",
+    fontSize: "12px",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  profileForm: {
+    marginTop: "12px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px",
+  },
+  profileFormRow: {
+    display: "grid",
+    gridTemplateColumns: "1fr 1fr",
+    gap: "10px",
+  },
+  profileInput: {
+    padding: "10px 12px",
+    borderRadius: "10px",
+    border: "1px solid var(--border-strong)",
+    backgroundColor: "var(--surface-muted)",
+    fontSize: "13px",
+    outline: "none",
+  },
+  profileFormActions: {
+    display: "flex",
+    gap: "10px",
+    flexWrap: "wrap",
+  },
+  profileSubmitButton: {
+    flex: 1,
+    padding: "10px 12px",
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#ffffff",
+    background:
+      "linear-gradient(135deg, var(--primary) 0%, var(--primary-strong) 100%)",
+    border: "none",
+    borderRadius: "12px",
+    cursor: "pointer",
+  },
+  profileCancelButton: {
+    flex: 1,
+    padding: "10px 12px",
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "var(--muted)",
+    backgroundColor: "transparent",
+    border: "1px solid var(--border-strong)",
+    borderRadius: "12px",
+    cursor: "pointer",
+  },
+  profileError: {
+    fontSize: "12px",
+    color: "#dc2626",
+    fontWeight: "600",
   },
 };
