@@ -178,12 +178,6 @@ export function ReadingsList({
                     <span style={styles.categoryGroup}>
                       <span
                         style={{
-                          ...styles.categoryDot,
-                          backgroundColor: breakdown.systolic.color,
-                        }}
-                      />
-                      <span
-                        style={{
                           ...styles.categoryText,
                           color: breakdown.systolic.color,
                         }}
@@ -193,12 +187,6 @@ export function ReadingsList({
                     </span>
                     <span style={styles.categoryDivider}>|</span>
                     <span style={styles.categoryGroup}>
-                      <span
-                        style={{
-                          ...styles.categoryDot,
-                          backgroundColor: breakdown.diastolic.color,
-                        }}
-                      />
                       <span
                         style={{
                           ...styles.categoryText,
@@ -386,11 +374,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: "center",
     gap: "4px",
   },
-  categoryDot: {
-    width: "6px",
-    height: "6px",
-    borderRadius: "999px",
-  },
+  // categoryDot: {
+  //   width: "6px",
+  //   height: "6px",
+  //   borderRadius: "999px",
+  // },
   categoryText: {
     fontSize: "9px",
     fontWeight: "600",
