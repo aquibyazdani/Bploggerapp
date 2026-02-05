@@ -587,6 +587,32 @@ body {
   background: radial-gradient(120% 120% at 50% -20%, #e6ebff 0%, #f6f7fb 55%, #f8fafc 100%);
 }
 
+/* Profile switcher dropdown theming */
+.profile-select {
+  color: #ffffff;
+}
+
+.profile-select option {
+  background-color: #5f6fe6;
+  color: #ffffff;
+}
+
+.profile-select optgroup {
+  background-color: #5f6fe6;
+  color: #ffffff;
+}
+
 #root {
   min-height: 100vh;
+}
+
+@keyframes sheetUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }

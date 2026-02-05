@@ -44,8 +44,19 @@ function AppContent() {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [profilesLoading, setProfilesLoading] = useState(false);
   const [selectedProfileId, setSelectedProfileId] = useState<string | null>(
-    () => localStorage.getItem("selectedProfileId")
+    () => localStorage.getItem("selectedProfileId"),
   );
+  const [isProfileSheetOpen, setIsProfileSheetOpen] = useState(false);
+  const [hiddenProfileIds, setHiddenProfileIds] = useState<string[]>(() => {
+    const raw = localStorage.getItem("hiddenProfileIds");
+    if (!raw) return [];
+    try {
+      const parsed = JSON.parse(raw);
+      return Array.isArray(parsed) ? parsed.map((id) => String(id)) : [];
+    } catch {
+      return [];
+    }
+  });
   const [showAddToHomescreenModal, setShowAddToHomescreenModal] =
     useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -127,12 +138,18 @@ function AppContent() {
         const data: Profile[] = await response.json();
         setProfiles(data);
 
+        const hiddenSet = new Set(hiddenProfileIds);
+        const visibleProfiles = data.filter(
+          (profile) => profile.isDefault || !hiddenSet.has(profile._id),
+        );
         const storedId = localStorage.getItem("selectedProfileId");
-        const storedProfile = data.find((profile) => profile._id === storedId);
+        const storedProfile = visibleProfiles.find(
+          (profile) => profile._id === storedId,
+        );
         const fallback =
           storedProfile ||
-          data.find((profile) => profile.isDefault) ||
-          data[0] ||
+          visibleProfiles.find((profile) => profile.isDefault) ||
+          visibleProfiles[0] ||
           null;
         selectProfile(fallback ? fallback._id : null);
       }
@@ -141,7 +158,7 @@ function AppContent() {
     } finally {
       setProfilesLoading(false);
     }
-  }, [apiBaseUrl, selectProfile, token]);
+  }, [apiBaseUrl, hiddenProfileIds, selectProfile, token]);
 
   // Load readings from API
   const loadReadings = useCallback(
@@ -154,13 +171,13 @@ function AppContent() {
       try {
         const response = await fetch(
           `${apiBaseUrl}/readings?profileId=${encodeURIComponent(
-            selectedProfileId
+            selectedProfileId,
           )}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         if (response.ok) {
@@ -175,7 +192,7 @@ function AppContent() {
         }
       }
     },
-    [apiBaseUrl, selectedProfileId, token]
+    [apiBaseUrl, selectedProfileId, token],
   );
 
   const handleCreateProfile = useCallback(
@@ -201,14 +218,11 @@ function AppContent() {
         console.error("Error adding profile:", error);
       }
     },
-    [apiBaseUrl, loadProfiles, token]
+    [apiBaseUrl, loadProfiles, token],
   );
 
   const handleUpdateProfile = useCallback(
-    async (
-      profileId: string,
-      updates: { name: string; relation: string }
-    ) => {
+    async (profileId: string, updates: { name: string; relation: string }) => {
       if (!token) return;
 
       try {
@@ -230,37 +244,57 @@ function AppContent() {
         console.error("Error updating profile:", error);
       }
     },
-    [apiBaseUrl, loadProfiles, token]
+    [apiBaseUrl, loadProfiles, token],
   );
 
-  const handleDeleteProfile = useCallback(
-    async (profileId: string) => {
-      if (!token) return;
-
-      try {
-        const response = await fetch(`${apiBaseUrl}/profiles/${profileId}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.ok) {
-          await loadProfiles();
-        } else {
-          throw new Error("Failed to delete profile");
-        }
-      } catch (error) {
-        console.error("Error deleting profile:", error);
-      }
+  const handleToggleProfileHidden = useCallback(
+    (profileId: string, hidden: boolean) => {
+      setHiddenProfileIds((prev) => {
+        const next = hidden
+          ? Array.from(new Set([...prev, profileId]))
+          : prev.filter((id) => id !== profileId);
+        localStorage.setItem("hiddenProfileIds", JSON.stringify(next));
+        return next;
+      });
     },
-    [apiBaseUrl, loadProfiles, token]
+    [],
+  );
+
+  const visibleProfiles = useMemo(
+    () =>
+      profiles.filter(
+        (profile) =>
+          profile.isDefault || !hiddenProfileIds.includes(profile._id),
+      ),
+    [hiddenProfileIds, profiles],
   );
 
   const selectedProfile = useMemo(
     () => profiles.find((profile) => profile._id === selectedProfileId) || null,
-    [profiles, selectedProfileId]
+    [profiles, selectedProfileId],
   );
+
+  useEffect(() => {
+    if (!selectedProfileId) return;
+    const selected = profiles.find(
+      (profile) => profile._id === selectedProfileId,
+    );
+    if (!selected) return;
+    if (selected.isDefault) return;
+    if (!hiddenProfileIds.includes(selectedProfileId)) return;
+
+    const fallback =
+      visibleProfiles.find((profile) => profile.isDefault) ||
+      visibleProfiles[0] ||
+      null;
+    selectProfile(fallback ? fallback._id : null);
+  }, [
+    hiddenProfileIds,
+    profiles,
+    selectProfile,
+    selectedProfileId,
+    visibleProfiles,
+  ]);
 
   useEffect(() => {
     if (user && token) {
@@ -306,6 +340,17 @@ function AppContent() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, [currentPage]);
 
+  useEffect(() => {
+    if (!isProfileSheetOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsProfileSheetOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isProfileSheetOpen]);
+
   // Listen for PWA install prompt
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
@@ -320,7 +365,7 @@ function AppContent() {
     return () => {
       window.removeEventListener(
         "beforeinstallprompt",
-        handleBeforeInstallPrompt
+        handleBeforeInstallPrompt,
       );
     };
   }, []);
@@ -384,7 +429,7 @@ function AppContent() {
         setReadingsLoading(false);
       }
     },
-    [apiBaseUrl, loadReadings, selectedProfileId, token]
+    [apiBaseUrl, loadReadings, selectedProfileId, token],
   );
 
   const handleEditReading = useCallback((reading: Reading) => {
@@ -416,7 +461,7 @@ function AppContent() {
               note: updatedReading.note,
               profileId: selectedProfileId,
             }),
-          }
+          },
         );
 
         if (!response.ok) {
@@ -432,7 +477,7 @@ function AppContent() {
         setReadingsLoading(false);
       }
     },
-    [apiBaseUrl, loadReadings, selectedProfileId, token]
+    [apiBaseUrl, loadReadings, selectedProfileId, token],
   );
 
   const handleDeleteReading = useCallback(
@@ -463,7 +508,7 @@ function AppContent() {
         setReadingsLoading(false);
       }
     },
-    [apiBaseUrl, editingReading, loadReadings, token]
+    [apiBaseUrl, editingReading, loadReadings, token],
   );
 
   const handleCancelEdit = useCallback(() => {
@@ -513,26 +558,29 @@ function AppContent() {
         <div style={styles.headerContent}>
           <Activity size={24} style={styles.headerIcon} />
           <h1 style={styles.headerTitle}>BP Tracker</h1>
-          {profiles.length > 0 && (
+          {visibleProfiles.length > 0 && (
             <div style={styles.profileSelector}>
-              <select
-                value={selectedProfileId || ""}
-                onChange={(event) => selectProfile(event.target.value)}
-                style={styles.profileSelect}
-                aria-label="Select profile"
-                disabled={profilesLoading}
-              >
-                {!selectedProfileId && (
-                  <option value="" disabled>
-                    Select profile
-                  </option>
-                )}
-                {profiles.map((profile) => (
-                  <option key={profile._id} value={profile._id}>
-                    {profile.name}
-                  </option>
-                ))}
-              </select>
+              <div style={styles.profileSelectWrap}>
+                <span style={styles.profileDot} />
+                <button
+                  type="button"
+                  style={styles.profileSelectButton}
+                  onClick={() => setIsProfileSheetOpen(true)}
+                  disabled={profilesLoading}
+                  aria-label="Open profile switcher"
+                >
+                  {selectedProfile?.name || "Select profile"}
+                </button>
+                <button
+                  type="button"
+                  style={styles.profileCaretButton}
+                  onClick={() => setIsProfileSheetOpen(true)}
+                  aria-label="Open profile switcher"
+                  disabled={profilesLoading}
+                >
+                  ▾
+                </button>
+              </div>
             </div>
           )}
           <div style={styles.headerActions}>
@@ -541,14 +589,14 @@ function AppContent() {
               style={styles.headerActionButton}
               aria-label="Settings"
             >
-              <Settings size={20} />
+              <Settings size={18} />
             </button>
             <button
               onClick={handleLogout}
               style={styles.headerActionButton}
               aria-label="Log out"
             >
-              <LogOut size={20} />
+              <LogOut size={18} />
             </button>
           </div>
         </div>
@@ -599,7 +647,8 @@ function AppContent() {
             onSelectProfile={selectProfile}
             onCreateProfile={handleCreateProfile}
             onUpdateProfile={handleUpdateProfile}
-            onDeleteProfile={handleDeleteProfile}
+            hiddenProfileIds={hiddenProfileIds}
+            onToggleProfileHidden={handleToggleProfileHidden}
           />
         )}
       </main>
@@ -695,6 +744,58 @@ function AppContent() {
         </button>
       </nav>
 
+      {isProfileSheetOpen && (
+        <div
+          style={styles.sheetOverlay}
+          onClick={() => setIsProfileSheetOpen(false)}
+        >
+          <div
+            style={styles.sheet}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div style={styles.sheetHandle} />
+            <div style={styles.sheetHeader}>
+              <span style={styles.sheetTitle}>Switch profile</span>
+              <button
+                type="button"
+                style={styles.sheetClose}
+                onClick={() => setIsProfileSheetOpen(false)}
+                aria-label="Close profile switcher"
+              >
+                ✕
+              </button>
+            </div>
+            <div style={styles.sheetList}>
+              {visibleProfiles.map((profile) => {
+                const isActive = profile._id === selectedProfileId;
+                return (
+                  <button
+                    key={profile._id}
+                    type="button"
+                    style={{
+                      ...styles.sheetItem,
+                      ...(isActive ? styles.sheetItemActive : {}),
+                    }}
+                    onClick={() => {
+                      selectProfile(profile._id);
+                      setIsProfileSheetOpen(false);
+                    }}
+                  >
+                    <div style={styles.sheetItemInfo}>
+                      <span style={styles.sheetItemName}>{profile.name}</span>
+                      <span style={styles.sheetItemMeta}>
+                        {profile.relation}
+                      </span>
+                    </div>
+                    {isActive && <span style={styles.sheetItemCheck}>✓</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Branding Footer */}
       <footer style={styles.brandingFooter}>
         <p style={styles.brandingText}>
@@ -749,7 +850,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     top: 0,
     zIndex: 40,
     boxShadow: "0 10px 24px rgba(var(--primary-rgb), 0.22)",
-    borderRadius: "0px 0px 18px 18px",
+    borderRadius: "0px 0px 16px 16px",
   },
   headerContent: {
     display: "flex",
@@ -761,7 +862,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: "#ffffff",
   },
   headerTitle: {
-    fontSize: "18px",
+    fontSize: "14px",
     fontWeight: "700",
     color: "#ffffff",
     margin: 0,
@@ -775,32 +876,151 @@ const styles: { [key: string]: React.CSSProperties } = {
     flex: 1,
     justifyContent: "center",
   },
-  profileSelect: {
+  profileSelectWrap: {
+    display: "flex",
+    alignItems: "center",
+    gap: "6px",
     background: "rgba(255, 255, 255, 0.2)",
     border: "1px solid rgba(255, 255, 255, 0.35)",
+    borderRadius: "12px",
+    padding: "4px 8px",
+    minWidth: "120px",
+    maxWidth: "170px",
+    boxShadow: "inset 0 0 0 1px rgba(255, 255, 255, 0.08)",
+  },
+  profileDot: {
+    width: "6px",
+    height: "6px",
+    borderRadius: "999px",
+    backgroundColor: "#ffffff",
+    boxShadow: "0 0 0 2px rgba(255, 255, 255, 0.22)",
+    flexShrink: 0,
+  },
+  profileSelectButton: {
+    background: "transparent",
+    border: "none",
     color: "#ffffff",
-    fontSize: "12px",
+    fontSize: "11px",
     fontWeight: "600",
-    borderRadius: "10px",
-    padding: "6px 10px",
-    minWidth: "110px",
-    maxWidth: "150px",
+    minWidth: "90px",
+    maxWidth: "130px",
     outline: "none",
-    appearance: "none",
+    textAlign: "left",
+    flex: 1,
+    cursor: "pointer",
+  },
+  profileCaretButton: {
+    background: "rgba(255, 255, 255, 0.18)",
+    border: "1px solid rgba(255, 255, 255, 0.3)",
+    borderRadius: "8px",
+    color: "rgba(255, 255, 255, 0.9)",
+    width: "22px",
+    height: "22px",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
   },
   headerActions: {
     display: "flex",
     alignItems: "center",
-    gap: "6px",
+    gap: "4px",
   },
   headerActionButton: {
     background: "rgba(255, 255, 255, 0.2)",
     border: "1px solid rgba(255, 255, 255, 0.25)",
     color: "#ffffff",
     cursor: "pointer",
-    padding: "6px",
-    borderRadius: "10px",
+    padding: "4px",
+    borderRadius: "8px",
     transition: "background-color 0.2s",
+  },
+  sheetOverlay: {
+    position: "fixed",
+    inset: 0,
+    backgroundColor: "rgba(15, 23, 42, 0.35)",
+    backdropFilter: "blur(6px)",
+    zIndex: 80,
+    display: "flex",
+    alignItems: "flex-end",
+    justifyContent: "center",
+    padding: "0 16px 16px 16px",
+  },
+  sheet: {
+    width: "100%",
+    maxWidth: "420px",
+    backgroundColor: "#ffffff",
+    borderRadius: "24px",
+    padding: "12px 16px 20px",
+    boxShadow: "0 24px 48px rgba(15, 23, 42, 0.2)",
+    border: "1px solid rgba(226, 232, 240, 0.8)",
+    animation: "sheetUp 180ms ease-out",
+  },
+  sheetHandle: {
+    width: "44px",
+    height: "5px",
+    borderRadius: "999px",
+    backgroundColor: "#e2e8f0",
+    margin: "4px auto 10px",
+  },
+  sheetHeader: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: "10px",
+  },
+  sheetTitle: {
+    fontSize: "15px",
+    fontWeight: "600",
+    color: "var(--text-strong)",
+  },
+  sheetClose: {
+    background: "transparent",
+    border: "none",
+    fontSize: "16px",
+    cursor: "pointer",
+    color: "var(--muted)",
+  },
+  sheetList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
+  },
+  sheetItem: {
+    width: "100%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "12px 14px",
+    borderRadius: "16px",
+    border: "1px solid rgba(148, 163, 184, 0.25)",
+    backgroundColor: "rgba(248, 250, 252, 0.9)",
+    cursor: "pointer",
+    textAlign: "left",
+  },
+  sheetItemActive: {
+    borderColor: "rgba(var(--primary-rgb), 0.5)",
+    backgroundColor: "rgba(var(--primary-rgb), 0.12)",
+  },
+  sheetItemInfo: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "2px",
+  },
+  sheetItemName: {
+    fontSize: "14px",
+    fontWeight: "600",
+    color: "var(--text-strong)",
+  },
+  sheetItemMeta: {
+    fontSize: "12px",
+    color: "var(--muted)",
+    textTransform: "capitalize",
+  },
+  sheetItemCheck: {
+    fontSize: "16px",
+    color: "var(--primary-strong)",
+    fontWeight: "700",
   },
   main: {
     flex: 1,

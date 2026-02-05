@@ -15,9 +15,10 @@ interface SettingsPageProps {
   onCreateProfile: (profile: { name: string; relation: string }) => void;
   onUpdateProfile: (
     profileId: string,
-    updates: { name: string; relation: string }
+    updates: { name: string; relation: string },
   ) => void;
-  onDeleteProfile: (profileId: string) => void;
+  hiddenProfileIds: string[];
+  onToggleProfileHidden: (profileId: string, hidden: boolean) => void;
 }
 
 export function SettingsPage({
@@ -33,13 +34,14 @@ export function SettingsPage({
   onSelectProfile,
   onCreateProfile,
   onUpdateProfile,
-  onDeleteProfile,
+  hiddenProfileIds,
+  onToggleProfileHidden,
 }: SettingsPageProps) {
   const [remindersEnabled, setRemindersEnabled] = useState(() => {
     return localStorage.getItem("remindersEnabled") === "true";
   });
   const [permission, setPermission] = useState(
-    typeof Notification !== "undefined" ? Notification.permission : "default"
+    typeof Notification !== "undefined" ? Notification.permission : "default",
   );
   const [status, setStatus] = useState<"idle" | "working">("idle");
   const [reminderError, setReminderError] = useState("");
@@ -52,7 +54,9 @@ export function SettingsPage({
     relation: "",
   });
   const [editingProfileId, setEditingProfileId] = useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<Profile | null>(null);
+
+  const isProfileHidden = (profileId: string) =>
+    hiddenProfileIds.includes(profileId);
 
   const formattedTimes = useMemo(() => {
     const toDisplay = (time: string) => {
@@ -88,8 +92,9 @@ export function SettingsPage({
       return;
     }
 
-    const publicKey = import.meta.env
-      .VITE_VAPID_PUBLIC_KEY as string | undefined;
+    const publicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY as
+      | string
+      | undefined;
     if (!publicKey) {
       setReminderError("Missing VAPID public key configuration.");
       return;
@@ -135,9 +140,7 @@ export function SettingsPage({
       setRemindersEnabled(true);
     } catch (err) {
       setReminderError(
-        err instanceof Error
-          ? err.message
-          : "Unable to enable reminders."
+        err instanceof Error ? err.message : "Unable to enable reminders.",
       );
     } finally {
       setStatus("idle");
@@ -167,9 +170,7 @@ export function SettingsPage({
       setRemindersEnabled(false);
     } catch (err) {
       setReminderError(
-        err instanceof Error
-          ? err.message
-          : "Unable to disable reminders."
+        err instanceof Error ? err.message : "Unable to disable reminders.",
       );
     } finally {
       setStatus("idle");
@@ -222,14 +223,6 @@ export function SettingsPage({
     setEditingProfileId(null);
   };
 
-  const handleDeleteConfirm = async () => {
-    if (!deleteTarget) return;
-    await onDeleteProfile(deleteTarget._id);
-    if (selectedProfileId === deleteTarget._id) {
-      onSelectProfile(null);
-    }
-    setDeleteTarget(null);
-  };
   return (
     <div style={styles.container}>
       <div style={styles.header}>
@@ -269,6 +262,9 @@ export function SettingsPage({
                     ...(selectedProfileId === profile._id
                       ? styles.profileSelectButtonActive
                       : {}),
+                    ...(isProfileHidden(profile._id)
+                      ? styles.profileSelectButtonHidden
+                      : {}),
                   }}
                   onClick={() => onSelectProfile(profile._id)}
                 >
@@ -283,10 +279,21 @@ export function SettingsPage({
                     Edit
                   </button>
                   <button
-                    style={styles.profileDeleteButton}
-                    onClick={() => setDeleteTarget(profile)}
+                    style={{
+                      ...styles.profileActionButton,
+                      ...(profile.isDefault
+                        ? styles.profileActionButtonDisabled
+                        : {}),
+                    }}
+                    disabled={profile.isDefault}
+                    onClick={() =>
+                      onToggleProfileHidden(
+                        profile._id,
+                        !isProfileHidden(profile._id)
+                      )
+                    }
                   >
-                    Delete
+                    {isProfileHidden(profile._id) ? "Show" : "Hide"}
                   </button>
                 </div>
               </div>
@@ -388,30 +395,6 @@ export function SettingsPage({
         </button>
       </div>
 
-      {deleteTarget && (
-        <div style={styles.confirmOverlay} onClick={() => setDeleteTarget(null)}>
-          <div
-            style={styles.confirmCard}
-            onClick={(event) => event.stopPropagation()}
-          >
-            <h3 style={styles.confirmTitle}>Delete profile?</h3>
-            <p style={styles.confirmText}>
-              All readings for {deleteTarget.name} will be permanently removed.
-            </p>
-            <div style={styles.confirmActions}>
-              <button
-                style={styles.confirmCancel}
-                onClick={() => setDeleteTarget(null)}
-              >
-                Cancel
-              </button>
-              <button style={styles.confirmDelete} onClick={handleDeleteConfirm}>
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       <div style={styles.card}>
         <div style={styles.cardHeader}>
           <div>
@@ -426,7 +409,7 @@ export function SettingsPage({
         </div>
 
         <div style={styles.reminderTimes}>
-        {formattedTimes.length > 0 ? (
+          {formattedTimes.length > 0 ? (
             formattedTimes.map((time) => (
               <span key={time} style={styles.timeChip}>
                 {time}
@@ -437,9 +420,7 @@ export function SettingsPage({
           )}
         </div>
 
-        {reminderError && (
-          <div style={styles.errorText}>{reminderError}</div>
-        )}
+        {reminderError && <div style={styles.errorText}>{reminderError}</div>}
 
         <div style={styles.reminderActions}>
           <button
@@ -447,7 +428,9 @@ export function SettingsPage({
             onClick={() => setConfirmAction("enable")}
             disabled={status === "working" || remindersEnabled}
           >
-            {permission === "granted" ? "Enable Reminders" : "Allow Notifications"}
+            {permission === "granted"
+              ? "Enable Reminders"
+              : "Allow Notifications"}
           </button>
           <button
             style={styles.secondaryAction}
@@ -464,10 +447,7 @@ export function SettingsPage({
           style={styles.confirmOverlay}
           onClick={() => setConfirmAction(null)}
         >
-          <div
-            style={styles.confirmCard}
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div style={styles.confirmCard} onClick={(e) => e.stopPropagation()}>
             <h3 style={styles.confirmTitle}>
               {confirmAction === "enable"
                 ? "Enable reminders?"
@@ -485,7 +465,10 @@ export function SettingsPage({
               >
                 Cancel
               </button>
-              <button style={styles.confirmPrimary} onClick={handleConfirmAction}>
+              <button
+                style={styles.confirmPrimary}
+                onClick={handleConfirmAction}
+              >
                 {confirmAction === "enable" ? "Enable" : "Disable"}
               </button>
             </div>
@@ -812,6 +795,9 @@ const styles: { [key: string]: React.CSSProperties } = {
     border: "1px solid var(--primary)",
     boxShadow: "0 6px 14px rgba(var(--primary-rgb), 0.2)",
   },
+  profileSelectButtonHidden: {
+    opacity: 0.55,
+  },
   profileName: {
     fontSize: "14px",
     fontWeight: "600",
@@ -836,15 +822,9 @@ const styles: { [key: string]: React.CSSProperties } = {
     fontWeight: "600",
     cursor: "pointer",
   },
-  profileDeleteButton: {
-    backgroundColor: "rgba(239, 68, 68, 0.08)",
-    border: "1px solid rgba(239, 68, 68, 0.35)",
-    color: "#ef4444",
-    borderRadius: "10px",
-    padding: "6px 10px",
-    fontSize: "12px",
-    fontWeight: "600",
-    cursor: "pointer",
+  profileActionButtonDisabled: {
+    opacity: 0.5,
+    cursor: "not-allowed",
   },
   profileForm: {
     marginTop: "12px",
