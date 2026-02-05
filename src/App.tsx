@@ -558,7 +558,7 @@ function AppContent() {
         <div style={styles.headerContent}>
           <Activity size={24} style={styles.headerIcon} />
           <h1 style={styles.headerTitle}>BP Tracker</h1>
-          {visibleProfiles.length > 0 && (
+          {visibleProfiles.length > 1 && (
             <div style={styles.profileSelector}>
               <div style={styles.profileSelectWrap}>
                 <span style={styles.profileDot} />
@@ -862,7 +862,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: "#ffffff",
   },
   headerTitle: {
-    fontSize: "14px",
+    fontSize: "17px",
     fontWeight: "700",
     color: "#ffffff",
     margin: 0,
