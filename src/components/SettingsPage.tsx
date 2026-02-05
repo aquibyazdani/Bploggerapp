@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Profile } from "../types/profile";
 
 interface SettingsPageProps {
@@ -49,6 +49,7 @@ export function SettingsPage({
   const [confirmAction, setConfirmAction] = useState<
     "enable" | "disable" | null
   >(null);
+  const [profileNameForm, setProfileNameForm] = useState("");
   const [profileForm, setProfileForm] = useState({
     name: "",
     relation: "",
@@ -57,6 +58,15 @@ export function SettingsPage({
 
   const isProfileHidden = (profileId: string) =>
     hiddenProfileIds.includes(profileId);
+
+  const selectedProfile = useMemo(
+    () => profiles.find((profile) => profile._id === selectedProfileId) || null,
+    [profiles, selectedProfileId],
+  );
+
+  useEffect(() => {
+    setProfileNameForm(selectedProfile?.name || "");
+  }, [selectedProfile]);
 
   const formattedTimes = useMemo(() => {
     const toDisplay = (time: string) => {
@@ -223,6 +233,31 @@ export function SettingsPage({
     setEditingProfileId(null);
   };
 
+  const handleProfileNameSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!selectedProfile) {
+      setProfileError("Select a profile before updating the name.");
+      return;
+    }
+
+    const trimmedName = profileNameForm.trim();
+    if (!trimmedName) {
+      setProfileError("Name is required.");
+      return;
+    }
+
+    if (trimmedName === selectedProfile.name) {
+      setProfileError("Name is unchanged.");
+      return;
+    }
+
+    setProfileError("");
+    onUpdateProfile(selectedProfile._id, {
+      name: trimmedName,
+      relation: selectedProfile.relation,
+    });
+  };
+
   return (
     <div style={styles.container}>
       <div style={styles.header}>
@@ -240,6 +275,37 @@ export function SettingsPage({
         <div style={styles.emailRow}>
           <span style={styles.emailValue}>{email || "Not available"}</span>
         </div>
+      </div>
+
+      <div style={styles.card}>
+        <div style={styles.cardHeaderColumn}>
+          <h2 style={styles.cardTitle}>Profile Name</h2>
+          <p style={styles.cardDescription}>
+            Update the name used across your dashboard and summaries.
+          </p>
+        </div>
+        <form style={styles.profileForm} onSubmit={handleProfileNameSubmit}>
+          <input
+            type="text"
+            placeholder="Enter a name"
+            value={profileNameForm}
+            onChange={(event) => setProfileNameForm(event.target.value)}
+            style={styles.profileInput}
+            disabled={!selectedProfile}
+          />
+          {profileError && (
+            <div style={styles.profileError}>{profileError}</div>
+          )}
+          <div style={styles.profileFormActions}>
+            <button
+              style={styles.profileSubmitButton}
+              type="submit"
+              disabled={!selectedProfile || profileNameForm.trim().length === 0}
+            >
+              Save Name
+            </button>
+          </div>
+        </form>
       </div>
 
       {/* <div style={styles.card}>
